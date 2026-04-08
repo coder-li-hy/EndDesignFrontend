@@ -1,0 +1,58 @@
+<!-- components/SideMenu.vue -->
+<template>
+  <el-menu
+      :default-active="activeMenu"
+      class="side-menu"
+      background-color="#545c64"
+      text-color="#fff"
+      active-text-color="#ffd04b"
+      :router="true"
+  >
+    <template v-for="menu in menuList">
+      <el-menu-item
+          :key="menu.path"
+          :index="menu.path"
+      >
+        <i :class="menu.icon"></i>
+        <span slot="title">{{ menu.title }}</span>
+      </el-menu-item>
+    </template>
+  </el-menu>
+</template>
+
+<script>
+export default {
+  computed: {
+    activeMenu() {
+      return this.$route.path
+    },
+
+    // ⭐ 根据角色返回不同的菜单列表
+    menuList() {
+      const userInfo = JSON.parse(sessionStorage.getItem('userInfo') || '{}')
+      const role = userInfo.role
+
+      const menus = {
+        'ADMIN': [
+          { path: '/admin/users', title: '用户管理', icon: 'el-icon-user' },
+          { path: '/admin/audit', title: '内容审核', icon: 'el-icon-document' },
+          { path: '/admin/config', title: '系统配置', icon: 'el-icon-setting' },
+          { path: '/profile', title: '个人中心', icon: 'el-icon-user-solid' }
+        ],
+        'TEACHER': [
+          { path: '/teacher/courses', title: '我的课程', icon: 'el-icon-video-camera' },
+          { path: '/teacher/assignments', title: '作业管理', icon: 'el-icon-edit' },
+          { path: '/profile', title: '个人中心', icon: 'el-icon-user-solid' }
+        ],
+        'STUDENT': [
+          { path: '/student/market', title: '选课超市', icon: 'el-icon-shopping-cart' },
+          { path: '/student/my-courses', title: '我的课程', icon: 'el-icon-book' },
+          { path: '/profile', title: '个人中心', icon: 'el-icon-user-solid' }
+        ]
+      }
+
+      return menus[role] || []
+    }
+  }
+}
+</script>
