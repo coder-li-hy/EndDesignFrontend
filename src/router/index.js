@@ -40,6 +40,11 @@ const routes = [
         path: '/helpus',
         name: 'helpus',
         component: () => import('@/views/SysViews/helpUs.vue')
+    },
+    {
+        path: '/profile',
+        name: 'profile',
+        component: () => import('@/views/SysViews/ProfileView.vue')
     }
     // {
     //   //方式二：

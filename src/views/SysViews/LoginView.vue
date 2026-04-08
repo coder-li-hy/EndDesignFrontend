@@ -118,10 +118,10 @@ export default {
 
           this.$message.success('登录成功，正在跳转...');
 
-          // // 跳转到主页
-          // this.$router.push({
-          //   name: 'products',
-          // })
+          // 跳转到主页
+          this.$router.push({
+            name: 'profile',
+          })
         }
       }).catch(err => {
         this.$message.error('网络请求失败，请检查连接');
