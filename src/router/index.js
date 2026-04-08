@@ -4,59 +4,137 @@ import VueRouter from 'vue-router'
 Vue.use(VueRouter)
 
 const routes = [
+    // ========== 公开页面（无需登录） ==========
     {
-        // 当打开页面访问到的是/这个路径时将其重定向到/dept路径
-        // 即默认访问部门管理页面
         path: '/',
         redirect: '/login',
     },
     {
-        // 方式一：这里表示要访问HomeView这个组件
-        path: '/products',
-        name: 'products',
-        component: () => import( '@/views/SysViews/ProductView.vue')
-    },
-    {
         path: '/login',
         name: 'login',
-        component: () => import ('@/views/SysViews/LoginView.vue')
+        component: () => import('@/views/SysViews/LoginView.vue'),
+        meta: { public: true }  // 标记为公开页面
     },
-    {
-        path: '/mine',
-        name: 'mine',
-        component: () => import('@/views/SysViews/MyDetailView.vue')
-    },
-    {
-        path: '/myproducts',
-        name: 'myproducts',
-        component: () => import('@/views/SysViews/MyProductsView.vue')
-    },
-    {
-        path: '/aboutus',
-        name: 'aboutus',
-        component: () => import('@/views/SysViews/AboutUs.vue')
-    },
-    {
-        path: '/helpus',
-        name: 'helpus',
-        component: () => import('@/views/SysViews/helpUs.vue')
-    },
+
+    // ========== 个人中心（所有登录用户） ==========
     {
         path: '/profile',
         name: 'profile',
-        component: () => import('@/views/SysViews/ProfileView.vue')
+        component: () => import('@/views/SysViews/ProfileView.vue'),
+        meta: { requireLogin: true }  // 需要登录，不限制角色
+    },
+
+    // ========== 管理员菜单 ==========
+    {
+        path: '/admin',
+        name: 'admin',
+        redirect: '/admin/users',  // 默认跳转到子路由
+        meta: { requireLogin: true, role: 'ADMIN' },  // 只允许管理员
+        children: [
+            // {
+            //     path: 'users',
+            //     name: 'admin-users',
+            //     component: () => import('@/views/Admin/UserManage.vue'),
+            //     meta: { title: '用户管理' }
+            // },
+            // {
+            //     path: 'audit',
+            //     name: 'admin-audit',
+            //     component: () => import('@/views/Admin/ContentAudit.vue'),
+            //     meta: { title: '内容审核' }
+            // },
+            // {
+            //     path: 'config',
+            //     name: 'admin-config',
+            //     component: () => import('@/views/Admin/SystemConfig.vue'),
+            //     meta: { title: '系统配置' }
+            // }
+        ]
+    },
+
+    // ========== 教师菜单 ==========
+    {
+        path: '/teacher',
+        name: 'teacher',
+        redirect: '/teacher/courses',
+        meta: { requireLogin: true, role: 'TEACHER' },  // 只允许教师
+        children: [
+            // {
+            //     path: 'courses',
+            //     name: 'teacher-courses',
+            //     component: () => import('@/views/Teacher/CourseManage.vue'),
+            //     meta: { title: '我的课程' }
+            // },
+            // {
+            //     path: 'assignments',
+            //     name: 'teacher-assignments',
+            //     component: () => import('@/views/Teacher/AssignmentManage.vue'),
+            //     meta: { title: '作业管理' }
+            // }
+        ]
+    },
+
+    // ========== 学生菜单 ==========
+    {
+        path: '/student',
+        name: 'student',
+        redirect: '/student/market',
+        meta: { requireLogin: true, role: 'STUDENT' },  // 只允许学生
+        children: [
+            // {
+            //     path: 'market',
+            //     name: 'student-market',
+            //     component: () => import('@/views/Student/CourseMarket.vue'),
+            //     meta: { title: '选课超市' }
+            // },
+            // {
+            //     path: 'my-courses',
+            //     name: 'student-my-courses',
+            //     component: () => import('@/views/Student/MyCourses.vue'),
+            //     meta: { title: '我的课程' }
+            // }
+        ]
+    },
+
+    // ========== 404 页面 ==========
+    {
+        path: '*',
+        redirect: '/login'
     }
-    // {
-    //   //方式二：
-    //   path: '/dept',
-    //   name: 'dept',
-    //   // 直接访问组件AboutView
-    //   component: () => import( '../views/ElementView/ElementView.vue')
-    // }
 ]
 
 const router = new VueRouter({
+    mode: 'history',  // 去掉 URL 中的 # 号（可选）
     routes
+})
+
+// ========== 最简单的路由守卫（只处理登录状态） ==========
+router.beforeEach((to, from, next) => {
+    // 1. 如果是公开页面（如登录页），直接放行
+    if (to.meta['public']) {
+        next()
+        return
+    }
+
+    // 2. 如果需要登录，检查是否已登录（通过 sessionStorage 判断）
+    if (to.meta['requireLogin']) {
+        // 判断登录状态：你的后端用 Session，前端可以存一个标记
+        const isLogin = sessionStorage.getItem('isLogin') === 'true'
+
+        if (!isLogin) {
+            // 未登录：提示 + 跳转登录页，并记录原路径
+            alert('请先登录')  // 或用 Vue.prototype.$message.warning()
+            next({
+                path: '/login',
+                query: { redirect: to.fullPath }  // 登录成功后跳回原页面
+            })
+            return
+        }
+    }
+
+    // 3. 其他情况直接放行
+    // ⚠️ 角色权限校验交给后端接口，前端不做拦截
+    next()
 })
 
 export default router

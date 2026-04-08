@@ -106,10 +106,13 @@ export default {
         }
         // 如果登陆成功
         else {
-          // 先清空浏览器本地存储
-          localStorage.clear();
-          // 将新发的jwt令牌存至本地存储
-          localStorage.setItem('token', resp.data.data);
+          // // 先清空浏览器本地存储
+          // localStorage.clear();
+          // // 将新发的jwt令牌存至本地存储
+          // localStorage.setItem('token', resp.data.data);
+
+          // 设置isLogin为true
+          sessionStorage.setItem('isLogin','true')
 
           // 记住我功能
           if (this.rememberMe) {

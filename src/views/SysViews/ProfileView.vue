@@ -273,7 +273,7 @@ export default {
         // 如果需要修改其他字段，在这里添加
       };
 
-      axios.put('/api/auth/profile', params)  // ⚠️ 确认你的后端是否有这个接口
+      axios.put('/api/auth/profile', params)
           .then(resp => {
             if (resp.data.code === 200 || resp.data.code === 1) {
               this.$message.success('信息保存成功');
