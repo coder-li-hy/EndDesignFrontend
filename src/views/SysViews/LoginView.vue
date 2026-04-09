@@ -113,17 +113,17 @@ export default {
 
           // 设置isLogin为true
           sessionStorage.setItem('isLogin','true')
+          sessionStorage.setItem('userInfo',JSON.stringify(resp.data.data))
 
           // 记住我功能
           if (this.rememberMe) {
             localStorage.setItem('rememberedUser', this.ruleForm.user);
           }
 
-          this.$message.success('登录成功，正在跳转...');
-
+          this.$message.success("登录成功");
           // 跳转到主页
           this.$router.push({
-            name: 'profile',
+            name: 'admin',
           })
         }
       }).catch(err => {

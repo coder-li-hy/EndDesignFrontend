@@ -28,15 +28,16 @@ const routes = [
     {
         path: '/admin',
         name: 'admin',
+        component: () => import('@/views/SysViews/MainLayout.vue'),
         redirect: '/admin/users',  // 默认跳转到子路由
         meta: { requireLogin: true, role: 'ADMIN' },  // 只允许管理员
         children: [
-            // {
-            //     path: 'users',
-            //     name: 'admin-users',
-            //     component: () => import('@/views/Admin/UserManage.vue'),
-            //     meta: { title: '用户管理' }
-            // },
+            {
+                path: 'users',
+                name: 'admin-users',
+                component: () => import('@/views/SysViews/Admin/UserManage.vue'),
+                meta: { title: '用户管理' }
+            },
             // {
             //     path: 'audit',
             //     name: 'admin-audit',
@@ -56,7 +57,8 @@ const routes = [
     {
         path: '/teacher',
         name: 'teacher',
-        redirect: '/teacher/courses',
+        component: () => import('@/views/SysViews/MainLayout.vue'),
+        // redirect: '/teacher/courses',
         meta: { requireLogin: true, role: 'TEACHER' },  // 只允许教师
         children: [
             // {
@@ -78,7 +80,8 @@ const routes = [
     {
         path: '/student',
         name: 'student',
-        redirect: '/student/market',
+        // redirect: '/student/market',
+        component: () => import('@/views/SysViews/MainLayout.vue'),
         meta: { requireLogin: true, role: 'STUDENT' },  // 只允许学生
         children: [
             // {
