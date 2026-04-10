@@ -63,6 +63,7 @@
       </div>
 
       <el-table
+          ref="userTable"
           :data="userList"
           v-loading="loading"
           border
@@ -70,8 +71,6 @@
           @selection-change="handleSelectionChange"
       >
         <el-table-column type="selection" width="50" align="center" />
-        <el-table-column type="index" label="序号" width="60" align="center" />
-
         <el-table-column prop="username" label="用户名" min-width="120" />
 
         <el-table-column prop="role" label="角色" width="100" align="center">
@@ -121,6 +120,7 @@
                 type="text"
                 :disabled="row.username === 'admin'"
             @click="handleDelete(row)">
+              删除
             </el-button>
           </template>
         </el-table-column>
@@ -152,10 +152,10 @@
       <el-form :model="form" :rules="rules" ref="formRef" label-width="100px">
 
         <el-form-item label="用户名" prop="username">
-          <el-input>
+          <el-input
               v-model="form.username"
-              :disabled="dialogType === 'edit'"  <!-- 编辑时用户名不可改 -->
-          placeholder="请输入用户名" </el-input>
+              :disabled="dialogType === 'edit'"
+          placeholder="请输入用户名" />
         </el-form-item>
 
         <el-form-item label="密码" prop="password" v-if="dialogType === 'add'">
@@ -201,6 +201,60 @@
     </el-dialog>
 
     <!-- 批量导入弹窗 -->
+<!--    <el-dialog-->
+<!--        title="批量导入用户"-->
+<!--        :visible.sync="importDialogVisible"-->
+<!--        width="450px"-->
+<!--        :close-on-click-modal="false"-->
+<!--    >-->
+<!--      <el-alert-->
+<!--          title="导入说明"-->
+<!--          type="info"-->
+<!--          :closable="false"-->
+<!--          show-icon-->
+<!--          class="import-tip"-->
+<!--      >-->
+<!--        <template #default>-->
+<!--          <p>1. 请下载模板文件，按要求填写用户信息</p>-->
+<!--          <p>2. 密码列可选，不填则使用默认密码 123456</p>-->
+<!--          <p>3. 支持 .xlsx / .xls 格式，单次最多导入 100 条</p>-->
+<!--        </template>-->
+<!--      </el-alert>-->
+
+<!--      <el-form label-width="100px" style="margin-top: 20px">-->
+<!--        <el-form-item label="模板下载">-->
+<!--          <el-button type="text" icon="el-icon-download" @click="downloadTemplate">-->
+<!--            下载导入模板-->
+<!--          </el-button>-->
+<!--        </el-form-item>-->
+<!--        <el-form-item label="选择文件" prop="file">-->
+<!--          <el-upload-->
+<!--              ref="uploadRef"-->
+<!--              action="/admin/users/import"-->
+<!--          :headers="uploadHeaders"-->
+<!--          :before-upload="beforeUpload"-->
+<!--          :on-success="handleImportSuccess"-->
+<!--          :on-error="handleImportError"-->
+<!--          :auto-upload="false"-->
+<!--          :limit="1"-->
+<!--          accept=".xlsx,.xls"-->
+<!--          >-->
+<!--          <el-button size="small" type="primary">选择文件</el-button>-->
+<!--          <div slot="tip" class="el-upload__tip">-->
+<!--            只能上传 excel 文件，且不超过 5MB-->
+<!--          </div>-->
+<!--          </el-upload>-->
+<!--        </el-form-item>-->
+<!--      </el-form>-->
+
+<!--      <template #footer>-->
+<!--        <el-button @click="importDialogVisible = false">取 消</el-button>-->
+<!--        <el-button type="primary" :loading="importing" @click="submitImport">-->
+<!--          {{ importing ? '导入中...' : '开始导入' }}-->
+<!--        </el-button>-->
+<!--      </template>-->
+<!--    </el-dialog>-->
+    <!-- 批量导入弹窗 -->
     <el-dialog
         title="批量导入用户"
         :visible.sync="importDialogVisible"
@@ -221,37 +275,13 @@
         </template>
       </el-alert>
 
-      <el-form label-width="100px" style="margin-top: 20px">
-        <el-form-item label="模板下载">
-          <el-button type="text" icon="el-icon-download" @click="downloadTemplate">
-            下载导入模板
-          </el-button>
-        </el-form-item>
-        <el-form-item label="选择文件" prop="file">
-          <el-upload
-              ref="uploadRef"
-              action="/admin/users/import"
-          :headers="uploadHeaders"
-          :before-upload="beforeUpload"
-          :on-success="handleImportSuccess"
-          :on-error="handleImportError"
-          :auto-upload="false"
-          :limit="1"
-          accept=".xlsx,.xls"
-          >
-          <el-button size="small" type="primary">选择文件</el-button>
-          <div slot="tip" class="el-upload__tip">
-            只能上传 excel 文件，且不超过 5MB
-          </div>
-          </el-upload>
-        </el-form-item>
-      </el-form>
+      <div class="development-notice">
+        <i class="el-icon-warning-outline"></i>
+        <span>批量导入功能开发中，敬请期待...</span>
+      </div>
 
       <template #footer>
-        <el-button @click="importDialogVisible = false">取 消</el-button>
-        <el-button type="primary" :loading="importing" @click="submitImport">
-          {{ importing ? '导入中...' : '开始导入' }}
-        </el-button>
+        <el-button @click="importDialogVisible = false">关 闭</el-button>
       </template>
     </el-dialog>
 
@@ -384,19 +414,20 @@ export default {
       }
     }
   },
-
-  created() {
+  //
+  // created() {
+  //   this.fetchUsers()
+  // },
+  mounted() {
     this.fetchUsers()
   },
-
   methods: {
     // ========== 数据加载 ==========
-
     // 获取用户列表
     async fetchUsers() {
       this.loading = true
       try {
-        const resp = await axios.get('/admin/users', {
+        const resp = await axios.get('/api/admin/users/page', {
           params: {
             username: this.searchForm.username,
             role: this.searchForm.role,
@@ -405,9 +436,17 @@ export default {
             size: this.size
           }
         })
-        if (resp.code === 200) {
-          this.userList = resp.data.records
-          this.total = resp.data.total
+        // ⭐ 添加调试输出
+        console.log('=== 响应调试 ===')
+        console.log('resp:', resp)
+        console.log('resp.data:', resp.data)
+        console.log('resp.code:', resp.code)
+        console.log('resp.data?.code:', resp.data?.code)
+        console.log('resp.data?.data?.records:', resp.data?.data?.records)
+        console.log('================')
+        if (resp.data.code === 1) {
+          this.userList = resp.data.data.records
+          this.total = resp.data.data.total
         }
       } finally {
         this.loading = false
@@ -462,7 +501,7 @@ export default {
     async handleStatusChange(row) {
       const statusText = row.status === 'ACTIVE' ? '启用' : '禁用'
       try {
-        await axios.put(`/admin/users/${row.userId}/status`, {
+        await axios.put(`/api/admin/users/${row.userId}/status`, {
           status: row.status
         })
         this.$message.success(`用户${statusText}成功`)
@@ -501,14 +540,14 @@ export default {
       this.submitting = true
       try {
         if (this.dialogType === 'add') {
-          await axios.post('/admin/users', this.form)
+          await axios.post('/api/admin/users', this.form)
           this.$message.success('用户添加成功')
         } else {
-          await axios.put(`/admin/users/${this.form.userId}`, this.form)
+          await axios.put(`/api/admin/users/${this.form.userId}`, this.form)
           this.$message.success('用户更新成功')
         }
         this.dialogVisible = false
-        this.fetchUsers()
+        await this.fetchUsers()
       } catch (e) {
         this.$message.error(e.msg || '操作失败')
       } finally {
@@ -552,11 +591,11 @@ export default {
         cancelButtonText: '取消'
       }).then(async () => {
         try {
-          await axios.delete('/admin/users/batch', {
+          await axios.delete('/api/admin/users/batch', {
             data: { userIds: this.selectedIds }
           })
           this.$message.success('删除成功')
-          this.fetchUsers()
+          await this.fetchUsers()
         } catch (e) {
           this.$message.error(e.msg || '删除失败')
         }
@@ -576,9 +615,9 @@ export default {
         cancelButtonText: '取消'
       }).then(async () => {
         try {
-          await axios.delete(`/admin/users/${row.userId}`)
+          await axios.delete(`/api/admin/users/${row.userId}`)
           this.$message.success('删除成功')
-          this.fetchUsers()
+          await this.fetchUsers()
         } catch (e) {
           this.$message.error(e.msg || '删除失败')
         }
@@ -600,7 +639,7 @@ export default {
     async submitResetPwd() {
       this.resetting = true
       try {
-        await axios.post(`/admin/users/${this.resetPwdForm.userId}/reset-pwd`)
+        await axios.post(`/api/admin/users/${this.resetPwdForm.userId}/reset-pwd`)
         this.$message.success('密码已重置为 123456')
         this.resetPwdDialogVisible = false
       } catch (e) {
@@ -611,6 +650,7 @@ export default {
     },
 
     // ========== 批量导入 ==========
+    // 该模块开发中
 
     // 打开导入弹窗
     openImportDialog() {
@@ -648,7 +688,7 @@ export default {
 
     // 导入成功回调
     handleImportSuccess(response) {
-      if (response.code === 200) {
+      if (response.code === 1) {
         this.$message.success(`导入成功，新增 ${response.data.successCount} 条，失败 ${response.data.failCount} 条`)
         this.importDialogVisible = false
         this.fetchUsers()
@@ -705,7 +745,23 @@ export default {
 .user-manage {
   padding: 0;
 }
+.import-tip {
+  margin-bottom: 20px;
+}
 
+.development-notice {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 30px 0;
+  color: #909399;
+  font-size: 16px;
+}
+
+.development-notice i {
+  margin-right: 8px;
+  font-size: 20px;
+}
 .page-header {
   display: flex;
   justify-content: space-between;
