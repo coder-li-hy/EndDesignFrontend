@@ -38,12 +38,12 @@ const routes = [
                 component: () => import('@/views/SysViews/Admin/UserManage.vue'),
                 meta: { title: '用户管理' }
             },
-            // {
-            //     path: 'audit',
-            //     name: 'admin-audit',
-            //     component: () => import('@/views/Admin/ContentAudit.vue'),
-            //     meta: { title: '内容审核' }
-            // },
+            {
+                path: 'audit',
+                name: 'admin-audit',
+                component: () => import('@/views/SysViews/Admin/ContentAudit.vue'),
+                meta: { title: '内容审核' }
+            },
             // {
             //     path: 'config',
             //     name: 'admin-config',
