@@ -499,7 +499,6 @@ export default {
   font-size: 14px;
   padding-bottom: 8px;
 }
-
 .el-message {
   z-index: 9999 !important;
 }
