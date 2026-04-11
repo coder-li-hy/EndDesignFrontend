@@ -106,14 +106,11 @@ export default {
         }
         // 如果登陆成功
         else {
-          // // 先清空浏览器本地存储
-          // localStorage.clear();
-          // // 将新发的jwt令牌存至本地存储
-          // localStorage.setItem('token', resp.data.data);
+          // 设置登录状态
+          sessionStorage.setItem('isLogin', 'true')
 
-          // 设置isLogin为true
-          sessionStorage.setItem('isLogin','true')
-          sessionStorage.setItem('userInfo',JSON.stringify(resp.data.data))
+          // ✅ 关键：存储完整的用户信息（包含 role 字段）
+          sessionStorage.setItem('userInfo', JSON.stringify(resp.data.data))
 
           // 记住我功能
           if (this.rememberMe) {
@@ -121,10 +118,25 @@ export default {
           }
 
           this.$message.success("登录成功");
-          // 跳转到主页
-          this.$router.push({
-            name: 'admin',
-          })
+
+          // ✅ 核心修改：根据角色跳转到不同界面
+          const role = resp.data.data.role;  // 从后端返回的用户信息中获取角色
+          const roleRoutes = {
+            'ADMIN': 'admin',           // 管理员 → /admin（默认跳到 /admin/users）
+            'TEACHER': 'teacher',       // 教师 → /teacher（默认跳到 /teacher/courses）
+            'STUDENT': 'student'        // 学生 → /student（默认跳到 /student/market）
+          };
+
+          // 获取目标路由名称，如果角色未知则默认跳教师
+          const targetRoute = roleRoutes[role] || 'teacher';
+
+          // 跳转（带 redirect 参数，方便登录后返回原页面）
+          const redirect = this.$route.query.redirect;
+          if (redirect) {
+            this.$router.replace(redirect);
+          } else {
+            this.$router.replace({ name: targetRoute });
+          }
         }
       }).catch(err => {
         this.$message.error('网络请求失败，请检查连接');

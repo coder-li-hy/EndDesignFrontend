@@ -58,15 +58,15 @@ const routes = [
         path: '/teacher',
         name: 'teacher',
         component: () => import('@/views/SysViews/MainLayout.vue'),
-        // redirect: '/teacher/courses',
+        redirect: '/teacher/courses',
         meta: { requireLogin: true, role: 'TEACHER' },  // 只允许教师
         children: [
-            // {
-            //     path: 'courses',
-            //     name: 'teacher-courses',
-            //     component: () => import('@/views/Teacher/CourseManage.vue'),
-            //     meta: { title: '我的课程' }
-            // },
+            {
+                path: 'courses',
+                name: 'teacher-courses',
+                component: () => import('@/views/SysViews/Teacher/CourseManage.vue'),
+                meta: { title: '我的课程' }
+            },
             // {
             //     path: 'assignments',
             //     name: 'teacher-assignments',
