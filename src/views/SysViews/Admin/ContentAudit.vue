@@ -454,7 +454,7 @@ export default {
     // 获取审核统计
     async fetchStats() {
       try {
-        const resp = await axios.get('/api/admin/audit/stats')
+        const resp = await axios.get('/api/audit/stats')
         if (resp.data.code === 1) {
           this.stats = resp.data.data
         }
@@ -467,7 +467,7 @@ export default {
     async fetchAuditList() {
       this.loading = true
       try {
-        const resp = await axios.get('/api/admin/audit/list', {
+        const resp = await axios.get('/api/audit/list', {
           params: {
             targetType: this.searchForm.targetType,
             status: this.searchForm.status,
@@ -544,7 +544,7 @@ export default {
         cancelButtonText: '取消'
       }).then(async () => {
         try {
-          await axios.post(`/api/admin/audit/${row.auditId}/approve`)
+          await axios.post(`/apin/audit/${row.auditId}/approve`)
           this.$message.success('审核通过')
           this.fetchStats()
           this.fetchAuditList()
@@ -570,7 +570,7 @@ export default {
 
       this.rejecting = true
       try {
-        await axios.post(`/api/admin/audit/${this.selectedTarget.auditId}/reject`, {
+        await axios.post(`/api/audit/${this.selectedTarget.auditId}/reject`, {
           reason: this.rejectForm.reason
         })
         this.$message.success('已拒绝')
@@ -605,7 +605,7 @@ export default {
         type: 'success'
       }).then(async () => {
         try {
-          await axios.post('/api/admin/audit/batch/approve', {
+          await axios.post('/api/audit/batch/approve', {
             auditIds: this.selectedIds
           })
           this.$message.success('批量通过成功')
@@ -626,14 +626,14 @@ export default {
 
       this.batchRejecting = true
       try {
-        await axios.post('/api/admin/audit/batch/reject', {
+        await axios.post('/api/audit/batch/reject', {
           auditIds: this.selectedIds,
           reason: this.batchRejectForm.reason
         })
         this.$message.success('批量拒绝成功')
         this.batchRejectDialogVisible = false
-        this.fetchStats()
-        this.fetchAuditList()
+        await this.fetchStats()
+        await this.fetchAuditList()
       } catch (e) {
         this.$message.error(e.response?.data?.msg || '操作失败')
       } finally {
@@ -647,10 +647,10 @@ export default {
         type: 'warning'
       }).then(async () => {
         try {
-          await axios.post(`/api/admin/audit/${row.auditId}/reaudit`)
+          await axios.post(`/api/audit/${row.auditId}/reaudit`)
           this.$message.success('已重置为待审核')
-          this.fetchStats()
-          this.fetchAuditList()
+          await this.fetchStats()
+          await this.fetchAuditList()
         } catch (e) {
           this.$message.error(e.response?.data?.msg || '操作失败')
         }
