@@ -44,12 +44,12 @@ const routes = [
                 component: () => import('@/views/SysViews/Admin/ContentAudit.vue'),
                 meta: { title: '内容审核' }
             },
-            // {
-            //     path: 'config',
-            //     name: 'admin-config',
-            //     component: () => import('@/views/Admin/SystemConfig.vue'),
-            //     meta: { title: '系统配置' }
-            // }
+            {
+                path: 'config',
+                name: 'admin-config',
+                component: () => import('@/views/SysViews/Admin/SystemConfig.vue'),
+                meta: { title: '系统配置' }
+            }
         ]
     },
 
