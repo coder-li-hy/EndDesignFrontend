@@ -57,11 +57,7 @@
           <template #default="{ row }">
             <div class="resource-info">
               <div class="resource-title" :title="row.title">{{ row.title }}</div>
-              <el-tag
-                  size="mini"
-                  :type="getTypeTagType(row.type)"
-                  style="margin-top: 4px"
-              >
+              <el-tag size="mini" :type="getTypeTagType(row.type)" style="margin-top: 4px">
                 {{ getTypeText(row.type) }}
               </el-tag>
             </div>
@@ -71,10 +67,7 @@
         <!-- 审核状态 -->
         <el-table-column label="审核状态" width="100" align="center">
           <template #default="{ row }">
-            <el-tag
-                :type="getAuditTagType(row.auditStatus)"
-                size="mini"
-            >
+            <el-tag :type="getAuditTagType(row.auditStatus)" size="mini">
               {{ getAuditText(row.auditStatus) }}
             </el-tag>
           </template>
@@ -97,10 +90,11 @@
             <!-- 文件类型：下载 -->
             <el-link
                 v-else-if="['PPT', 'VIDEO', 'FILE'].includes(row.type)"
-                :href="row.fileUrl"
+                :href="getFileDownloadUrl(row)"
                 target="_blank"
                 type="primary"
                 :disabled="row.auditStatus !== 'PASS'"
+                :download="getDownloadFileName(row)"
             >
               <i class="el-icon-download"></i> 下载
             </el-link>
@@ -120,26 +114,13 @@
         <!-- 操作 -->
         <el-table-column label="操作" width="180" fixed="right" align="center">
           <template #default="{ row }">
-            <el-button size="mini" type="text" @click="openEditDialog(row)">
-              编辑
-            </el-button>
-            <el-button
-                size="mini"
-                type="text"
-                style="color: #f56c6c"
-                @click="handleDelete(row)"
-            >
-              删除
-            </el-button>
-            <!-- 已拒绝的资源可重新提交审核（可选） -->
+            <el-button size="mini" type="text" @click="openEditDialog(row)">编辑</el-button>
+            <el-button size="mini" type="text" style="color: #f56c6c" @click="handleDelete(row)">删除</el-button>
             <el-button
                 v-if="row.auditStatus === 'REJECT'"
-                size="mini"
-                type="text"
+                size="mini" type="text"
                 @click="resubmitAudit(row)"
-            >
-              重提
-            </el-button>
+            >重提</el-button>
           </template>
         </el-table-column>
       </el-table>
@@ -169,12 +150,7 @@
       <el-form :model="form" :rules="rules" ref="formRef" label-width="100px">
 
         <el-form-item label="资源标题" prop="title">
-          <el-input
-              v-model="form.title"
-              placeholder="请输入资源标题"
-              maxlength="100"
-              show-word-limit
-          />
+          <el-input v-model="form.title" placeholder="请输入资源标题" maxlength="100" show-word-limit />
         </el-form-item>
 
         <el-form-item label="资源类型" prop="type">
@@ -187,11 +163,7 @@
         </el-form-item>
 
         <!-- 文件上传（非链接类型显示） -->
-        <el-form-item
-            v-if="form.type !== 'LINK'"
-            label="上传文件"
-            prop="fileUrl"
-        >
+        <el-form-item v-if="form.type !== 'LINK'" label="上传文件" prop="fileUrl">
           <el-upload
               ref="uploadRef"
               :action="uploadUrl"
@@ -205,45 +177,25 @@
               :auto-upload="false"
           >
             <el-button size="small" type="primary">选择文件</el-button>
-            <div slot="tip" class="el-upload__tip">
-              {{ getUploadTip(form.type) }}
-            </div>
+            <div slot="tip" class="el-upload__tip">{{ getUploadTip(form.type) }}</div>
           </el-upload>
         </el-form-item>
 
         <!-- 链接输入（链接类型显示） -->
-        <el-form-item
-            v-else
-            label="资源链接"
-            prop="fileUrl"
-        >
-          <el-input
-              v-model="form.fileUrl"
-              placeholder="请输入资源链接地址（如：https://...）"
-          />
+        <el-form-item v-else label="资源链接" prop="fileUrl">
+          <el-input v-model="form.fileUrl" placeholder="请输入资源链接地址（如：https://...）" />
           <div class="form-tip">支持 B 站、慕课等教学平台链接</div>
         </el-form-item>
 
         <el-form-item label="资源描述" prop="description">
-          <el-input
-              v-model="form.description"
-              type="textarea"
-              :rows="3"
-              placeholder="请输入资源简介或使用说明（可选）"
-              maxlength="200"
-              show-word-limit
-          />
+          <el-input v-model="form.description" type="textarea" :rows="3" placeholder="请输入资源简介或使用说明（可选）" maxlength="200" show-word-limit />
         </el-form-item>
 
       </el-form>
 
       <template #footer>
         <el-button @click="dialogVisible = false">取 消</el-button>
-        <el-button
-            type="primary"
-            :loading="submitting"
-            @click="handleSubmit"
-        >
+        <el-button type="primary" :loading="submitting" @click="handleSubmit">
           {{ submitting ? '提交中...' : '确 定' }}
         </el-button>
       </template>
@@ -265,11 +217,7 @@ export default {
       courseName: '',
 
       // 搜索条件
-      searchForm: {
-        title: '',
-        type: '',
-        auditStatus: ''
-      },
+      searchForm: { title: '', type: '', auditStatus: '' },
 
       // 资源列表
       loading: false,
@@ -285,8 +233,9 @@ export default {
       form: {
         resourceId: null,
         title: '',
-        type: 'PPT',  // PPT/VIDEO/FILE/LINK
+        type: 'PPT',
         fileUrl: '',
+        oriName: '',
         description: ''
       },
       rules: {
@@ -294,20 +243,14 @@ export default {
           { required: true, message: '请输入资源标题', trigger: 'blur' },
           { min: 2, max: 100, message: '长度在 2 到 100 个字符', trigger: 'blur' }
         ],
-        type: [
-          { required: true, message: '请选择资源类型', trigger: 'change' }
-        ],
-        fileUrl: [
-          { required: true, message: '请上传文件或输入链接', trigger: 'change' }
-        ]
+        type: [{ required: true, message: '请选择资源类型', trigger: 'change' }],
+        fileUrl: [{ required: true, message: '请上传文件或输入链接', trigger: 'change' }]
       },
 
       // 文件上传相关
       fileList: [],
-      uploadUrl: '/api/common/upload',  // 替换为你的文件上传接口
-      uploadHeaders: {
-        // Token 由 axios 拦截器自动添加
-      },
+      uploadUrl: '/api/common/upload',
+      uploadHeaders: {},
 
       // 资源类型映射
       typeMap: {
@@ -327,10 +270,8 @@ export default {
   },
 
   created() {
-    // 获取课程参数（从"我的课程"页面跳转时携带）
     this.courseId = this.$route.query.courseId
     this.courseName = this.$route.query.courseName
-
     if (this.courseId) {
       this.fetchResources()
     } else {
@@ -340,10 +281,8 @@ export default {
 
   methods: {
     // ========== 数据加载 ==========
-
     async fetchResources() {
       if (!this.courseId) return
-
       this.loading = true
       try {
         const resp = await axios.get('/api/teacher/resources', {
@@ -368,24 +307,12 @@ export default {
       }
     },
 
-    // 搜索
-    handleSearch() {
-      this.page = 1
-      this.fetchResources()
-    },
-
-    // 重置搜索
-    handleReset() {
-      this.searchForm = { title: '', type: '', auditStatus: '' }
-      this.handleSearch()
-    },
-
-    // 分页
+    handleSearch() { this.page = 1; this.fetchResources() },
+    handleReset() { this.searchForm = { title: '', type: '', auditStatus: '' }; this.handleSearch() },
     handlePageChange(p) { this.page = p; this.fetchResources() },
     handleSizeChange(s) { this.size = s; this.page = 1; this.fetchResources() },
 
     // ========== 资源管理 ==========
-
     openAddDialog() {
       this.dialogType = 'add'
       this.resetForm()
@@ -395,33 +322,32 @@ export default {
     openEditDialog(row) {
       this.dialogType = 'edit'
       this.form = JSON.parse(JSON.stringify(row))
-      // 编辑时初始化文件列表（用于显示已上传的文件名）
+
+      // 编辑时初始化文件列表（显示原始文件名）
       if (row.fileUrl && row.type !== 'LINK') {
-        const fileName = row.fileUrl.split('/').pop()
-        this.fileList = [{ name: fileName, url: row.fileUrl }]
+        const displayName = row.oriName || row.fileUrl.split('/').pop()
+        this.fileList = [{ name: displayName, url: row.fileUrl, uid: Date.now() }]
       }
       this.dialogVisible = true
     },
 
-    // 资源类型变化时清空文件列表
     handleTypeChange() {
       this.fileList = []
       this.form.fileUrl = ''
-      if (this.$refs.uploadRef) {
-        this.$refs.uploadRef.clearFiles()
-      }
+      this.form.oriName = ''
+      if (this.$refs.uploadRef) this.$refs.uploadRef.clearFiles()
     },
 
-    // 提交表单（上传 + 保存）
     async handleSubmit() {
-      try {
-        await this.$refs.formRef.validate()
-      } catch {
-        return
-      }
+      try { await this.$refs.formRef.validate() } catch { return }
 
-      // 非链接类型：先上传文件
-      if (this.form.type !== 'LINK' && this.dialogType === 'add') {
+      // 非链接类型：如果需要上传新文件
+      const hasNewFile = this.$refs.uploadRef?.uploadFiles?.length > 0 &&
+          this.$refs.uploadRef.uploadFiles[0]?.status !== 'success'
+      const needUpload = this.form.type !== 'LINK' &&
+          (this.dialogType === 'add' || (this.dialogType === 'edit' && hasNewFile))
+
+      if (needUpload) {
         const file = this.$refs.uploadRef?.uploadFiles?.[0]?.raw
         if (!file) {
           this.$message.warning('请先选择要上传的文件')
@@ -430,7 +356,6 @@ export default {
 
         this.submitting = true
         try {
-          // 1. 上传文件
           const formData = new FormData()
           formData.append('file', file)
           const uploadResp = await axios.post(this.uploadUrl, formData, {
@@ -438,7 +363,8 @@ export default {
           })
 
           if (uploadResp.data.code === 1) {
-            this.form.fileUrl = uploadResp.data.data.filePath  // 后端返回的文件路径
+            this.form.fileUrl = uploadResp.data.data.filePath
+            this.form.oriName = uploadResp.data.data.oriName
           } else {
             throw new Error(uploadResp.data.msg || '文件上传失败')
           }
@@ -449,12 +375,13 @@ export default {
         }
       }
 
-      // 2. 保存资源信息
+      // 保存资源信息
       try {
         const submitData = {
           ...this.form,
-          courseId: this.courseId,  // 关联当前课程
-          auditStatus: 'PENDING'    // 新资源默认待审核
+          courseId: this.courseId,
+          // 新增时设为待审核，编辑时不修改审核状态
+          auditStatus: this.dialogType === 'add' ? 'PENDING' : undefined
         }
 
         if (this.dialogType === 'add') {
@@ -474,13 +401,7 @@ export default {
     },
 
     resetForm() {
-      this.form = {
-        resourceId: null,
-        title: '',
-        type: 'PPT',
-        fileUrl: '',
-        description: ''
-      }
+      this.form = { resourceId: null, title: '', type: 'PPT', fileUrl: '', oriName: '', description: '' }
       this.fileList = []
       if (this.$refs.formRef) this.$refs.formRef.resetFields()
       if (this.$refs.uploadRef) this.$refs.uploadRef.clearFiles()
@@ -488,12 +409,9 @@ export default {
 
     handleDialogClose() { this.resetForm() },
 
-    // 删除资源
-    handleDelete(row) {
+    async handleDelete(row) {
       this.$confirm(`确定要删除资源「${row.title}」吗？`, '提示', {
-        type: 'warning',
-        confirmButtonText: '确定',
-        cancelButtonText: '取消'
+        type: 'warning', confirmButtonText: '确定', cancelButtonText: '取消'
       }).then(async () => {
         try {
           await axios.delete(`/api/teacher/resources/${row.resourceId}`)
@@ -505,12 +423,8 @@ export default {
       })
     },
 
-    // 重新提交审核（已拒绝的资源）
     async resubmitAudit(row) {
-      await this.$confirm(`确定要重新提交「${row.title}」进行审核吗？`, '提示', {
-        type: 'warning'
-      })
-
+      await this.$confirm(`确定要重新提交「${row.title}」进行审核吗？`, '提示', { type: 'warning' })
       try {
         await axios.put(`/api/teacher/resources/${row.resourceId}/resubmit`)
         this.$message.success('已重新提交审核')
@@ -521,85 +435,62 @@ export default {
     },
 
     // ========== 文件上传相关 ==========
-
-    // 上传前校验
     beforeUpload(file) {
       const typeConfig = this.typeMap[this.form.type]
       if (!typeConfig) return false
 
-      // 文件大小校验（单位：MB）
-      const maxSize = this.form.type === 'VIDEO' ? 500 :
-          this.form.type === 'PPT' ? 100 : 50
-      const isLtMax = file.size / 1024 / 1024 < maxSize
-
-      if (!isLtMax) {
+      const maxSize = this.form.type === 'VIDEO' ? 500 : this.form.type === 'PPT' ? 100 : 50
+      if (file.size / 1024 / 1024 >= maxSize) {
         this.$message.error(`${typeConfig.label}大小不能超过 ${maxSize}MB!`)
         return false
       }
 
-      // 文件类型校验（简化：只校验扩展名）
       const ext = file.name.split('.').pop().toLowerCase()
       const allowedExts = typeConfig.accept.split(',').map(e => e.replace('.', '').trim())
       if (!allowedExts.includes(ext)) {
         this.$message.error(`不支持的文件类型：.${ext}`)
         return false
       }
-
       return true
     },
 
-    // 上传成功回调
     handleUploadSuccess(response) {
       if (response.code === 1) {
-        this.form.fileUrl = response.data.filePath
+        this.form.fileUrl = response.data.data.filePath
+        this.form.oriName = response.data.data.oriName
         this.$message.success('文件上传成功')
       } else {
         this.$message.error(response.msg || '上传失败')
       }
     },
 
-    // 上传失败回调
     handleUploadError() {
       this.$message.error('文件上传失败，请检查网络或文件格式')
     },
 
     // ========== 工具方法 ==========
-
-    // 获取资源类型标签颜色
-    getTypeTagType(type) {
-      return this.typeMap[type]?.tag || 'info'
+    getFileDownloadUrl(row) {
+      // 开发环境用完整地址，生产环境用相对路径（依赖 Nginx 转发）
+      return process.env.NODE_ENV === 'development'
+          ? `http://localhost:8080${row.fileUrl}`
+          : row.fileUrl
     },
 
-    // 获取资源类型中文
-    getTypeText(type) {
-      return this.typeMap[type]?.label || type
+    getDownloadFileName(row) {
+      // 优先使用原始文件名，否则从路径提取
+      return row.oriName || row.fileUrl?.split('/').pop() || 'download'
     },
 
-    // 获取审核状态标签颜色
-    getAuditTagType(status) {
-      return this.auditMap[status]?.tag || 'info'
-    },
+    getTypeTagType(type) { return this.typeMap[type]?.tag || 'info' },
+    getTypeText(type) { return this.typeMap[type]?.label || type },
+    getAuditTagType(status) { return this.auditMap[status]?.tag || 'info' },
+    getAuditText(status) { return this.auditMap[status]?.label || status },
+    getAcceptType(type) { return this.typeMap[type]?.accept || '' },
+    getUploadTip(type) { return this.typeMap[type]?.tip || '' },
 
-    // 获取审核状态中文
-    getAuditText(status) {
-      return this.auditMap[status]?.label || status
-    },
-
-    // 获取文件选择框的 accept 属性
-    getAcceptType(type) {
-      return this.typeMap[type]?.accept || ''
-    },
-
-    // 获取上传提示文字
-    getUploadTip(type) {
-      return this.typeMap[type]?.tip || ''
-    },
-
-    // 格式化日期时间
     formatDateTime(dateTime) {
       if (!dateTime) return '-'
-      // 后端返回格式: "2026-04-09 22:41:18"
-      return dateTime
+      return dateTime  // 后端返回格式: "2026-04-09 22:41:18"
     }
   }
 }
@@ -644,7 +535,6 @@ export default {
   margin: 0 20px 20px 20px;
 }
 
-/* 资源信息样式 */
 .resource-info {
   display: flex;
   flex-direction: column;
@@ -660,7 +550,6 @@ export default {
   max-width: 180px;
 }
 
-/* 表单提示 */
 .form-tip {
   font-size: 12px;
   color: #909399;
@@ -672,7 +561,6 @@ export default {
   color: #909399;
 }
 
-/* 分页 */
 .pagination-wrapper {
   margin-top: 20px;
   display: flex;
@@ -688,7 +576,7 @@ export default {
   }
 }
 
-/* Element UI 组件深度定制（复用 LoginView 风格） */
+/* Element UI 组件深度定制 */
 .el-form-item__label {
   color: #555;
   font-weight: 500;

@@ -87,6 +87,9 @@
             <el-button size="mini" type="text" @click="goToResources(row)">
               资源
             </el-button>
+            <el-button size="mini" type="text" @click="goToProgress(row)">
+              进度管理
+            </el-button>
             <el-button size="mini" type="text" @click="goToStudents(row)">
               学生
             </el-button>
@@ -328,6 +331,12 @@ export default {
     goToResources(course) {
       this.$router.push({
         path: '/teacher/resources',
+        query: { courseId: course.courseId, courseName: course.courseName }
+      })
+    },
+    goToProgress(course) {
+      this.$router.push({
+        path: '/teacher/progress',
         query: { courseId: course.courseId, courseName: course.courseName }
       })
     },

@@ -77,7 +77,13 @@ const routes = [
                 path: 'resources',
                 name: 'teacher-resources',
                 component: () => import('@/views/SysViews/Teacher/ResourceManage.vue'),
-                meta: { title: '作业管理' }
+                meta: { title: '资源管理' }
+            },
+            {
+                path: 'progress',
+                name: 'resource-progress',
+                component: () => import('@/views/SysViews/Teacher/TeacherResourceProgress.vue'),
+                meta: { title: '进度跟踪' }
             },
         ]
     },
