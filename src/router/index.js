@@ -72,7 +72,13 @@ const routes = [
                 name: 'teacher-assignments',
                 component: () => import('@/views/SysViews/Teacher/AssignmentManage.vue'),
                 meta: { title: '作业管理' }
-            }
+            },
+            {
+                path: 'resources',
+                name: 'teacher-resources',
+                component: () => import('@/views/SysViews/Teacher/ResourceManage.vue'),
+                meta: { title: '作业管理' }
+            },
         ]
     },
 
