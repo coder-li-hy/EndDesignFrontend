@@ -278,7 +278,7 @@ export default {
           this.$message.success('课程更新成功')
         }
         this.dialogVisible = false
-        this.fetchCourses()
+        await this.fetchCourses()
       } catch (e) {
         this.$message.error(e.response?.data?.msg || '操作失败')
       } finally {
