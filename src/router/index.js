@@ -92,16 +92,22 @@ const routes = [
     {
         path: '/student',
         name: 'student',
-        // redirect: '/student/market',
+        redirect: '/student/courses',
         component: () => import('@/views/SysViews/MainLayout.vue'),
         meta: { requireLogin: true, role: 'STUDENT' },  // 只允许学生
         children: [
-            // {
-            //     path: 'market',
-            //     name: 'student-market',
-            //     component: () => import('@/views/Student/CourseMarket.vue'),
-            //     meta: { title: '选课超市' }
-            // },
+            {
+                path: 'courses',
+                name: 'student-courses',
+                component: () => import('@/views/SysViews/Student/StudentCourse.vue'),
+                meta: { title: '选课超市' }
+            },
+            {
+                path: 'market',
+                name: 'student-market',
+                component: () => import('@/views/SysViews/Student/StudentCourseMarket.vue'),
+                meta: { title: '选课超市' }
+            },
             // {
             //     path: 'my-courses',
             //     name: 'student-my-courses',
