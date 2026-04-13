@@ -65,9 +65,9 @@
     <!-- 空状态 -->
     <el-empty v-if="assignmentList.length === 0" description="该课程暂无作业" />
 
-    <!-- 提交作业弹窗 -->
+    <!-- 提交作业弹窗 - 标题动态显示 -->
     <el-dialog
-        title="提交作业"
+        :title="getSubmitDialogTitle()"
         :visible.sync="submitDialogVisible"
         width="550px"
         :close-on-click-modal="false"
@@ -127,7 +127,7 @@
           </el-upload>
         </el-form-item>
 
-        <!-- 迟交理由（仅当已截止且允许迟交时显示） -->
+        <!-- 迟交理由表单项下方添加提示 -->
         <el-form-item
             v-if="isExpired(currentAssignment) && currentAssignment?.allowLate"
             label="迟交理由"
@@ -137,9 +137,14 @@
               v-model="submitForm.lateReason"
               type="textarea"
               :rows="2"
-              placeholder="请输入迟交原因（可选）"
+              placeholder="请输入迟交原因（必填）"
               maxlength="200"
+              show-word-limit
           />
+          <!-- ⭐ 醒目提示 -->
+          <div class="form-tip" style="color: #f56c6c; margin-top: 4px">
+            <i class="el-icon-warning"></i> 迟交作业必须填写理由，否则无法提交
+          </div>
         </el-form-item>
 
       </el-form>
@@ -188,6 +193,25 @@ export default {
         ],
         filePath: [
           { required: true, message: '请上传文件', trigger: 'change' }
+        ],
+        // ⭐ 新增：迟交理由动态校验
+        lateReason: [
+          {
+            validator: (rule, value, callback) => {
+              // 只有已截止且允许迟交时，理由才必填
+              if (this.isExpired(this.currentAssignment) &&
+                  this.currentAssignment?.allowLate) {
+                if (!value || value.trim() === '') {
+                  callback(new Error('迟交作业必须填写理由'))
+                } else {
+                  callback()
+                }
+              } else {
+                callback()  // 非迟交情况不校验
+              }
+            },
+            trigger: 'blur'
+          }
         ]
       },
 
@@ -271,6 +295,19 @@ export default {
       })
     },
 
+// 动态获取弹窗标题
+    getSubmitDialogTitle() {
+      if (!this.currentAssignment) return '提交作业'
+
+      const prefix = this.currentAssignment.mySubmission ? '重新' : ''
+      const suffix = this.isExpired(this.currentAssignment) && this.currentAssignment.allowLate
+          ? '（迟交）'
+          : ''
+
+      return `${prefix}提交作业${suffix}`
+    },
+
+    // 改善：打开弹窗时自动聚焦
     openSubmitDialog(assignment) {
       this.currentAssignment = assignment
       this.submitForm = {
@@ -283,6 +320,14 @@ export default {
       }
       this.fileList = []
       this.submitDialogVisible = true
+
+      // ⭐ 自动聚焦：弹窗打开后聚焦到第一个输入框
+      this.$nextTick(() => {
+        const firstInput = this.$refs.submitFormRef?.$el?.querySelector('input, textarea')
+        if (firstInput) {
+          firstInput.focus()
+        }
+      })
     },
 
     handleContentTypeChange() {
@@ -320,6 +365,7 @@ export default {
         this.$message.error(response.msg || '上传失败')
       }
     },
+
 
     handleUploadError() {
       this.$message.error('文件上传失败，请检查网络')
