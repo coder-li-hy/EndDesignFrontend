@@ -108,12 +108,12 @@ const routes = [
                 component: () => import('@/views/SysViews/Student/StudentCourseMarket.vue'),
                 meta: { title: '选课超市' }
             },
-            // {
-            //     path: 'my-courses',
-            //     name: 'student-my-courses',
-            //     component: () => import('@/views/Student/MyCourses.vue'),
-            //     meta: { title: '我的课程' }
-            // }
+            {
+                path: 'submit',
+                name: 'student-submit',
+                component: () => import('@/views/SysViews/Student/StudentAssignmentSubmit.vue'),
+                meta: { title: '作业提交' }
+            }
         ]
     },
 

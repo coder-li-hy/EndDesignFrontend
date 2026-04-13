@@ -28,6 +28,14 @@
           <div class="course-actions">
             <el-button size="mini" type="text" @click="viewCourseDetail(course)">查看详情</el-button>
             <el-button size="mini" type="danger" @click="confirmCancel(course)">取消选课</el-button>
+            <!-- 在 course-actions 区域添加按钮 -->
+            <el-button
+                size="mini"
+                type="primary"
+                @click="submitAssignment(course)"
+            >
+              提交作业
+            </el-button>
           </div>
         </el-card>
 
@@ -93,6 +101,16 @@ export default {
   },
 
   methods: {
+    // 跳转到作业提交页面
+    submitAssignment(course) {
+      this.$router.push({
+        path: '/student/submit',
+        query: {
+          courseId: course.courseId,
+          courseName: course.courseName
+        }
+      })
+    },
     async fetchMyCourses(status = 'SELECTED') {
       if (!this.studentId) return
 
