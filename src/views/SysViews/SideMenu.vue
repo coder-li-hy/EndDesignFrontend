@@ -48,6 +48,7 @@ export default {
           { path: '/student/courses', title: '我的课程', icon: 'el-icon-book' },
           { path: '/student/market', title: '选课超市', icon: 'el-icon-shopping-cart' },
           { path: '/student/submit', title: '作业提交', icon: 'el-icon-shopping-cart' },
+          { path: '/student/courseQA', title: '课程问答', icon: 'el-icon-shopping-cart' },
         ]
       }
 

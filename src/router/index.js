@@ -113,7 +113,13 @@ const routes = [
                 name: 'student-submit',
                 component: () => import('@/views/SysViews/Student/StudentAssignmentSubmit.vue'),
                 meta: { title: '作业提交' }
-            }
+            },
+            {
+                path: 'courseQA',
+                name: 'student-courseQA',
+                component: () => import('@/views/SysViews/Student/StudentCourseQa.vue'),
+                meta: { title: '' }
+            },
         ]
     },
 

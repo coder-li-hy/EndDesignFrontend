@@ -36,6 +36,14 @@
             >
               提交作业
             </el-button>
+            <!-- 在 course-actions 区域添加按钮（已选课程） -->
+            <el-button
+                size="mini"
+                type="success"
+                @click="openQa(course)"
+            >
+              问答
+            </el-button>
           </div>
         </el-card>
 
@@ -101,6 +109,16 @@ export default {
   },
 
   methods: {
+    // 跳转到课程提问页面
+    openQa(course) {
+      this.$router.push({
+        path: '/student/courseQA',
+        query: {
+          courseId: course.courseId,
+          courseName: course.courseName
+        }
+      })
+    },
     // 跳转到作业提交页面
     submitAssignment(course) {
       this.$router.push({
