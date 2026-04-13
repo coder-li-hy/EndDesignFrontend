@@ -87,9 +87,6 @@
             <el-button size="mini" type="text" @click="goToResources(row)">
               资源
             </el-button>
-            <el-button size="mini" type="text" @click="goToProgress(row)">
-              进度管理
-            </el-button>
             <el-button size="mini" type="text" @click="goToStudents(row)">
               学生
             </el-button>

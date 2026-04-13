@@ -95,6 +95,8 @@
             <el-button size="mini" type="text" @click="viewSubmissions(row)">
               批改
             </el-button>
+            <!-- ⭐ 新增：查看学习进度 -->
+            <el-button size="mini" type="text" @click="viewProgress(row)">进度</el-button>
             <el-button
                 size="mini"
                 type="text"
@@ -409,6 +411,18 @@ export default {
   },
 
   methods: {
+    // 查看作业学习进度
+    viewProgress(row) {
+      this.$router.push({
+        path: '/teacher/progress',
+        query: {
+          assignmentId: row.assignmentId,
+          assignmentTitle: row.title,
+          courseId: this.courseId,
+          courseName: this.courseName
+        }
+      })
+    },
     // ========== 数据加载 ==========
 
     async fetchAssignments() {

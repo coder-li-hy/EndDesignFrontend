@@ -1,67 +1,82 @@
 <template>
-  <div class="resource-progress">
+  <div class="assignment-progress">
 
     <!-- 页面标题 -->
     <div class="page-header">
-      <h2 class="page-title">资源学习进度</h2>
-      <p class="course-info" v-if="courseName">课程：{{ courseName }}</p>
+      <h2 class="page-title">作业学习进度</h2>
+      <p class="course-info">
+        <el-tag size="mini">{{ courseName }}</el-tag>
+        <span style="margin: 0 10px">/</span>
+        <el-tag size="mini" type="primary">{{ assignmentTitle }}</el-tag>
+      </p>
     </div>
 
-    <!-- 筛选区 -->
-    <el-card class="filter-card" shadow="never">
-      <el-form :inline="true" :model="searchForm" size="small">
-        <el-form-item label="学生">
-          <el-input
-              v-model="searchForm.studentName"
-              placeholder="学生姓名"
-              clearable
-              @keyup.enter.native="handleSearch"
-          />
-        </el-form-item>
-        <el-form-item label="状态">
-          <el-select v-model="searchForm.isCompleted" placeholder="全部" clearable @change="handleSearch">
-            <el-option label="已学习" :value="true" />
-            <el-option label="未学习" :value="false" />
-          </el-select>
-        </el-form-item>
-        <el-form-item>
-          <el-button type="primary" @click="handleSearch">查询</el-button>
-          <el-button @click="handleReset">重置</el-button>
-        </el-form-item>
-      </el-form>
+    <!-- 统计卡片 -->
+    <el-row :gutter="20" style="margin-bottom: 20px">
+      <el-col :span="6">
+        <el-card shadow="never" class="stat-card">
+          <div class="stat-value">{{ stats.total }}</div>
+          <div class="stat-label">应交份数</div>
+        </el-card>
+      </el-col>
+      <el-col :span="6">
+        <el-card shadow="never" class="stat-card">
+          <div class="stat-value">{{ stats.submitted }}</div>
+          <div class="stat-label">已交份数</div>
+        </el-card>
+      </el-col>
+      <el-col :span="6">
+        <el-card shadow="never" class="stat-card">
+          <div class="stat-value">{{ stats.lateRate }}%</div>
+          <div class="stat-label">迟交率</div>
+        </el-card>
+      </el-col>
+      <el-col :span="6">
+        <el-card shadow="never" class="stat-card">
+          <div class="stat-value">{{ stats.passRate }}%</div>
+          <div class="stat-label">及格率</div>
+        </el-card>
+      </el-col>
+    </el-row>
+
+    <!-- 图表区 -->
+    <el-card class="chart-card" shadow="never">
+      <div ref="chartRef" style="width: 100%; height: 300px"></div>
     </el-card>
 
-    <!-- 进度表格 -->
-    <el-card class="table-card" shadow="never">
-      <el-table :data="progressList" v-loading="loading" border style="width: 100%">
+    <!-- 提交列表 -->
+    <el-card class="table-card" shadow="never" style="margin-top: 20px">
+      <el-table :data="submissionList" v-loading="loading" border style="width: 100%">
         <el-table-column type="index" label="序号" width="60" align="center" />
         <el-table-column prop="studentName" label="学生" width="120" />
-        <el-table-column prop="resourceTitle" label="资源" min-width="180" show-overflow-tooltip />
-        <el-table-column prop="resourceType" label="类型" width="100" align="center">
+        <el-table-column prop="submitTime" label="提交时间" width="160" align="center">
           <template #default="{ row }">
-            <el-tag size="mini" :type="getTypeTagType(row.resourceType)">
-              {{ getTypeText(row.resourceType) }}
+            {{ row.submitTime ? formatDateTime(row.submitTime) : '-' }}
+          </template>
+        </el-table-column>
+        <el-table-column prop="isLate" label="是否迟交" width="100" align="center">
+          <template #default="{ row }">
+            <el-tag :type="row.isLate ? 'danger' : 'success'" size="mini">
+              {{ row.isLate ? '是' : '否' }}
             </el-tag>
           </template>
         </el-table-column>
-        <el-table-column prop="isCompleted" label="状态" width="100" align="center">
+        <el-table-column prop="score" label="分数" width="100" align="center">
           <template #default="{ row }">
-            <el-tag :type="row.isCompleted ? 'success' : 'warning'" size="mini">
-              {{ row.isCompleted ? '已学习' : '未学习' }}
-            </el-tag>
+            <span v-if="row.score !== null" :class="{ 'text-success': row.score >= 60 }">
+              {{ row.score }}
+            </span>
+            <el-tag v-else size="mini" type="info">未批改</el-tag>
           </template>
         </el-table-column>
-        <el-table-column prop="viewTime" label="学习时间" width="160" align="center">
+        <el-table-column label="操作" width="100" align="center">
           <template #default="{ row }">
-            {{ row.viewTime ? formatDateTime(row.viewTime) : '-' }}
+            <el-button size="mini" type="text" @click="viewSubmission(row)">
+              查看
+            </el-button>
           </template>
         </el-table-column>
       </el-table>
-
-      <!-- 简化分页 -->
-      <div class="pagination-wrapper">
-        <span style="color: #666; font-size: 14px">共 {{ total }} 条</span>
-      </div>
     </el-card>
 
   </div>
@@ -69,87 +84,129 @@
 
 <script>
 import axios from 'axios'
+import * as echarts from 'echarts'
 
 export default {
   name: 'TeacherResourceProgress',
 
   data() {
     return {
+      assignmentId: null,
+      assignmentTitle: '',
       courseId: null,
       courseName: '',
 
-      searchForm: {
-        studentName: '',
-        isCompleted: null
-      },
-
       loading: false,
-      progressList: [],
-      total: 0
+      stats: {
+        total: 0,      // 应交份数（选课人数）
+        submitted: 0,  // 已交份数
+        lateRate: 0,   // 迟交率
+        passRate: 0    // 及格率
+      },
+      submissionList: [],
+
+      chart: null
+    }
+  },
+
+  created() {
+    // 获取路由参数
+    this.assignmentId = this.$route.query.assignmentId
+    this.assignmentTitle = this.$route.query.assignmentTitle
+    this.courseId = this.$route.query.courseId
+    this.courseName = this.$route.query.courseName
+
+    if (this.assignmentId && this.courseId) {
+      this.fetchProgress()
     }
   },
 
   mounted() {
-    this.courseId = this.$route.query.courseId
-    this.courseName = this.$route.query.courseName
-
-    if (this.courseId) {
-      this.fetchProgressList()
-    }else{
-      this.$message.warning('未选择课程 请返回选择课程')
-    }
+    // 初始化图表
+    this.initChart()
   },
-  created() {
-    this.courseId = this.$route.query.courseId
-    this.courseName = this.$route.query.courseName
-    console.log(this.courseId)
 
-    if (this.courseId) {
-      this.fetchProgressList()
+  beforeDestroy() {
+    // 销毁图表实例
+    if (this.chart) {
+      this.chart.dispose()
+      this.chart = null
     }
   },
 
   methods: {
-    async fetchProgressList() {
-      if (!this.courseId) return
+    async fetchProgress() {
+      if (!this.assignmentId) return
 
       this.loading = true
       try {
-        const resp = await axios.get('/api/teacher/resources/progress', {
-          params: {
-            courseId: this.courseId,
-            studentName: this.searchForm.studentName,
-            isCompleted: this.searchForm.isCompleted
-          }
-        })
+        const resp = await axios.get(`/api/teacher/assignments/${this.assignmentId}/progress`)
         if (resp.data.code === 1) {
-          this.progressList = resp.data.data.list || []
-          this.total = resp.data.data.total || 0
+          this.stats = resp.data.data.stats || {}
+          this.submissionList = resp.data.data.submissions || []
+          this.updateChart()
         }
       } catch (e) {
-        // 简化：异常时返回空列表，不弹窗
         console.error('Fetch progress error:', e)
-        this.progressList = []
-        this.total = 0
+        // 容错：异常时显示空数据
+        this.stats = { total: 0, submitted: 0, lateRate: 0, passRate: 0 }
+        this.submissionList = []
       } finally {
         this.loading = false
       }
     },
 
-    handleSearch() { this.fetchProgressList() },
-    handleReset() {
-      this.searchForm = { studentName: '', isCompleted: null }
-      this.fetchProgressList()
+    initChart() {
+      if (this.$refs.chartRef) {
+        this.chart = echarts.init(this.$refs.chartRef)
+        this.updateChart()
+      }
     },
 
-    getTypeTagType(type) {
-      const map = { 'PPT': 'primary', 'VIDEO': 'success', 'FILE': 'warning', 'LINK': 'info' }
-      return map[type] || 'info'
+    updateChart() {
+      if (!this.chart) return
+
+      const option = {
+        tooltip: { trigger: 'item' },
+        legend: { top: '5%', left: 'center' },
+        series: [
+          {
+            name: '提交状态',
+            type: 'pie',
+            radius: ['40%', '70%'],
+            avoidLabelOverlap: false,
+            itemStyle: {
+              borderRadius: 10,
+              borderColor: '#fff',
+              borderWidth: 2
+            },
+            label: { show: false, position: 'center' },
+            emphasis: {
+              label: { show: true, fontSize: 16, fontWeight: 'bold' }
+            },
+            data: [
+              { value: this.stats.submitted, name: '已提交', itemStyle: { color: '#67c23a' } },
+              { value: Math.max(0, this.stats.total - this.stats.submitted), name: '未提交', itemStyle: { color: '#909399' } }
+            ]
+          }
+        ]
+      }
+
+      this.chart.setOption(option)
     },
 
-    getTypeText(type) {
-      const map = { 'PPT': 'PPT', 'VIDEO': '视频', 'FILE': '文档', 'LINK': '链接' }
-      return map[type] || type
+    viewSubmission(row) {
+      // 简化：弹窗显示提交详情
+      this.$alert(`
+        <strong>学生：</strong>${row.studentName}<br>
+        <strong>提交时间：</strong>${this.formatDateTime(row.submitTime)}<br>
+        <strong>是否迟交：</strong>${row.isLate ? '是' : '否'}<br>
+        <strong>分数：</strong>${row.score !== null ? row.score : '未批改'}<br>
+        <strong>评语：</strong>${row.teacherComment || '-'}
+      `, '提交详情', {
+        dangerouslyUseHTMLString: true,
+        confirmButtonText: '确定'
+      })
     },
 
     formatDateTime(dateTime) {
@@ -161,7 +218,7 @@ export default {
 </script>
 
 <style scoped>
-.resource-progress {
+.assignment-progress {
   padding: 0;
   min-height: 100vh;
   background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
@@ -185,16 +242,37 @@ export default {
   color: #666;
 }
 
-.filter-card, .table-card {
+.stat-card {
+  text-align: center;
+  padding: 20px 10px;
+}
+
+.stat-value {
+  font-size: 24px;
+  font-weight: 600;
+  color: #667eea;
+  margin-bottom: 8px;
+}
+
+.stat-label {
+  font-size: 13px;
+  color: #909399;
+}
+
+.chart-card {
+  margin: 0 20px;
+}
+
+.table-card {
   margin: 0 20px 20px 20px;
 }
 
-.pagination-wrapper {
-  margin-top: 20px;
-  display: flex;
-  justify-content: flex-end;
+.text-success {
+  color: #67c23a;
+  font-weight: 500;
 }
 
+/* Element UI 定制 */
 .el-form-item__label {
   color: #555;
   font-weight: 500;
