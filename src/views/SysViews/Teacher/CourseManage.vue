@@ -94,6 +94,10 @@
             <el-button size="mini" type="text" @click="goToQa(row)">
               问答
             </el-button>
+            <!-- 在课程操作列添加"发送通知"按钮 -->
+            <el-button size="mini" type="success" @click="sendNotification(row)">
+              发送通知
+            </el-button>
           </template>
         </el-table-column>
       </el-table>
@@ -228,6 +232,47 @@ export default {
   },
 
   methods: {
+    // 发送课程通知
+    sendNotification(course) {
+      this.$prompt('请输入通知标题', '发送课程通知', {
+        confirmButtonText: '下一步',
+        cancelButtonText: '取消',
+        inputPattern: /^.{1,50}$/,
+        inputErrorMessage: '标题长度 1-50 个字符'
+      }).then(({ value: title }) => {
+        this.$prompt('请输入通知内容', '发送课程通知', {
+          confirmButtonText: '发送',
+          cancelButtonText: '取消',
+          inputType: 'textarea',
+          inputPattern: /^.{1,500}$/,
+          inputErrorMessage: '内容长度 1-500 个字符'
+        }).then(({ value: content }) => {
+          this.submitNotification(course.courseId, title, content)
+        }).catch(() => {
+          this.$message.info('已取消发送')
+        })
+      }).catch(() => {
+        this.$message.info('已取消')
+      })
+    },
+
+    async submitNotification(courseId, title, content) {
+      try {
+        const userInfo = JSON.parse(sessionStorage.getItem('userInfo') || '{}')
+        const teacherId = userInfo.userId
+
+        await axios.post('/api/teacher/notifications/send', {
+          courseId,
+          teacherId,
+          title,
+          content
+        })
+
+        this.$message.success('通知发送成功')
+      } catch (e) {
+        this.$message.error(e.response?.data?.msg || '发送失败')
+      }
+    },
     // 跳转到课程问答页面
     goToQa(course) {
       this.$router.push({

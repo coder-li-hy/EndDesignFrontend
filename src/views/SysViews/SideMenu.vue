@@ -37,6 +37,7 @@ export default {
           { path: '/admin/users', title: '用户管理', icon: 'el-icon-user' },
           { path: '/admin/audit', title: '内容审核', icon: 'el-icon-document' },
           { path: '/admin/config', title: '系统配置', icon: 'el-icon-setting' },
+          { path: '/admin/sendSys', title: '发送通知', icon: 'el-icon-setting' },
         ],
         'TEACHER': [
           { path: '/teacher/courses', title: '我的课程', icon: 'el-icon-video-camera' },

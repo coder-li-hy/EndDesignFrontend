@@ -58,6 +58,12 @@ const routes = [
                 name: 'admin-config',
                 component: () => import('@/views/SysViews/Admin/SystemConfig.vue'),
                 meta: { title: '系统配置' }
+            },
+            {
+                path: 'sendSys',
+                name: 'admin-sendSys',
+                component: () => import('@/views/SysViews/Admin/AdminSendSystemNotification.vue'),
+                meta: { title: '系统配置' }
             }
         ]
     },
