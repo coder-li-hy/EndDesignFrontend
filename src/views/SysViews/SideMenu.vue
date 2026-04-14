@@ -43,6 +43,7 @@ export default {
           { path: '/teacher/assignments', title: '作业管理', icon: 'el-icon-edit' },
           { path: '/teacher/resources', title: '课程资源', icon: 'el-icon-edit' },
           { path: '/teacher/progress', title: '资源管理', icon: 'el-icon-edit' },
+          { path: '/teacher/courseQA', title: '课程问答', icon: 'el-icon-edit' },
         ],
         'STUDENT': [
           { path: '/student/courses', title: '我的课程', icon: 'el-icon-book' },

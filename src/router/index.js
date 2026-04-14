@@ -85,6 +85,12 @@ const routes = [
                 component: () => import('@/views/SysViews/Teacher/TeacherResourceProgress.vue'),
                 meta: { title: '进度跟踪' }
             },
+            {
+                path: 'courseQA',
+                name: 'resource-courseQA',
+                component: () => import('@/views/SysViews/Teacher/TeacherCourseQa.vue'),
+                meta: { title: '课程问答' }
+            },
         ]
     },
 

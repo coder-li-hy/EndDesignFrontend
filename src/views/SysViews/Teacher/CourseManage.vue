@@ -90,6 +90,10 @@
             <el-button size="mini" type="text" @click="goToStudents(row)">
               学生
             </el-button>
+            <!-- 在课程操作列添加"问答"按钮 -->
+            <el-button size="mini" type="text" @click="goToQa(row)">
+              问答
+            </el-button>
           </template>
         </el-table-column>
       </el-table>
@@ -224,6 +228,16 @@ export default {
   },
 
   methods: {
+    // 跳转到课程问答页面
+    goToQa(course) {
+      this.$router.push({
+        path: '/teacher/courseQA',
+        query: {
+          courseId: course.courseId,
+          courseName: course.courseName
+        }
+      })
+    },
     // ========== 数据加载 ==========
 
     async fetchCourses() {
