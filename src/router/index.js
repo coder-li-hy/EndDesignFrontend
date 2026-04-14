@@ -23,6 +23,15 @@ const routes = [
         component: () => import('@/views/SysViews/ProfileView.vue'),
         meta: { requireLogin: true }  // 需要登录，不限制角色
     },
+    // ========== 查看通知（所有登录用户） ==========
+    {
+        path: '/notifications',
+        name: 'notifications',
+        component: () => import('@/views/SysViews/NotificationList.vue'),
+        meta: { requireLogin: true }  // 需要登录，不限制角色
+    },
+
+
 
     // ========== 管理员菜单 ==========
     {

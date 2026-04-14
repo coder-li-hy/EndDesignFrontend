@@ -177,7 +177,7 @@ export default {
       try {
         await axios.put(`/api/teacher/qa/${this.replyForm.qaId}/answer`, {
           answer: this.replyForm.answer,
-          teacherId: this.teacherId
+          teacherId: Number(this.teacherId)
         })
         this.$message.success('回复成功')
         this.replyDialogVisible = false

@@ -36,6 +36,10 @@
               <el-dropdown-item command="logout" divided>
                 <i class="el-icon-switch-button"></i> 退出登录
               </el-dropdown-item>
+              <!-- ⭐ 新增：我的通知 -->
+              <el-dropdown-item command="notifications">
+                <i class="el-icon-bell"></i> 我的通知
+              </el-dropdown-item>
             </el-dropdown-menu>
           </el-dropdown>
         </div>
@@ -88,6 +92,9 @@ export default {
         this.handleLogout()
       } else if (command === 'profile') {
         this.$router.push('/profile')
+      }else if (command === 'notifications') {
+        // ⭐ 跳转到通知页面
+        this.$router.push('/notifications')
       }
     },
 
