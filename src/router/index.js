@@ -4,7 +4,7 @@ import VueRouter from 'vue-router'
 Vue.use(VueRouter)
 
 const routes = [
-    // ========== 公开页面（无需登录） ==========
+    // 公开页面（无需登录）
     {
         path: '/',
         redirect: '/login',
@@ -16,14 +16,14 @@ const routes = [
         meta: { public: true }  // 标记为公开页面
     },
 
-    // ========== 个人中心（所有登录用户） ==========
+    // 个人中心（所有登录用户）
     {
         path: '/profile',
         name: 'profile',
         component: () => import('@/views/SysViews/ProfileView.vue'),
         meta: { requireLogin: true }  // 需要登录，不限制角色
     },
-    // ========== 查看通知（所有登录用户） ==========
+    // 查看通知（所有登录用户）
     {
         path: '/notifications',
         name: 'notifications',
@@ -33,7 +33,7 @@ const routes = [
 
 
 
-    // ========== 管理员菜单 ==========
+    // 管理员菜单
     {
         path: '/admin',
         name: 'admin',
@@ -68,7 +68,7 @@ const routes = [
         ]
     },
 
-    // ========== 教师菜单 ==========
+    // 教师菜单
     {
         path: '/teacher',
         name: 'teacher',
@@ -109,7 +109,7 @@ const routes = [
         ]
     },
 
-    // ========== 学生菜单 ==========
+    // 学生菜单
     {
         path: '/student',
         name: 'student',
@@ -144,7 +144,7 @@ const routes = [
         ]
     },
 
-    // ========== 404 页面 ==========
+    // 404 页面
     {
         path: '*',
         redirect: '/login'

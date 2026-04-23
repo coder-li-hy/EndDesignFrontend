@@ -544,7 +544,7 @@ export default {
         cancelButtonText: '取消'
       }).then(async () => {
         try {
-          await axios.post(`/apin/audit/${row.auditId}/approve`)
+          await axios.post(`/api/audit/${row.auditId}/approve`)
           this.$message.success('审核通过')
           this.fetchStats()
           this.fetchAuditList()
