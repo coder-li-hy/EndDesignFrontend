@@ -153,16 +153,17 @@
           />
         </el-form-item>
 
-        <el-form-item label="截止时间" prop="deadline">
-          <el-date-picker
-              v-model="form.deadline"
-              type="datetime"
-              placeholder="选择截止日期时间"
-              value-format="yyyy-MM-dd HH:mm:ss"
-              style="width: 100%"
-              :disabled-date="disabledDate"
-          />
-        </el-form-item>
+<!--        没有必要根据截止时间进行查询  -->
+<!--        <el-form-item label="截止时间" prop="deadline">-->
+<!--          <el-date-picker-->
+<!--              v-model="form.deadline"-->
+<!--              type="datetime"-->
+<!--              placeholder="选择截止日期时间"-->
+<!--              value-format="yyyy-MM-dd HH:mm:ss"-->
+<!--              style="width: 100%"-->
+<!--              :disabled-date="disabledDate"-->
+<!--          />-->
+<!--        </el-form-item>-->
 
         <el-form-item label="允许迟交">
           <el-switch
