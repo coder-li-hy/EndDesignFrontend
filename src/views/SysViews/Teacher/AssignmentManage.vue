@@ -44,7 +44,6 @@
     <!-- 作业列表 -->
     <el-card class="table-card" shadow="never">
       <el-table :data="assignmentList" v-loading="loading" border style="width: 100%">
-        <el-table-column type="index" label="序号" width="60" align="center" />
 
         <el-table-column prop="title" label="作业标题" min-width="180" show-overflow-tooltip />
 

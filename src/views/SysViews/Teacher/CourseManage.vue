@@ -36,7 +36,6 @@
     <!-- 课程列表 -->
     <el-card class="table-card" shadow="never">
       <el-table :data="courseList" v-loading="loading" border style="width: 100%">
-        <el-table-column type="index" label="序号" width="60" align="center" />
         <el-table-column prop="courseName" label="课程名称" min-width="150" />
 
         <el-table-column prop="credits" label="学分" width="80" align="center">

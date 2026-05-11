@@ -50,7 +50,6 @@
     <!-- 资源列表 -->
     <el-card class="table-card" shadow="never">
       <el-table :data="resourceList" v-loading="loading" border style="width: 100%">
-        <el-table-column type="index" label="序号" width="60" align="center" />
 
         <!-- 资源标题 + 类型标签 -->
         <el-table-column label="资源信息" min-width="200">
