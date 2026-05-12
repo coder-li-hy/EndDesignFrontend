@@ -98,7 +98,6 @@
           @selection-change="handleSelectionChange"
       >
         <el-table-column type="selection" width="50" align="center" />
-        <el-table-column type="index" label="序号" width="60" align="center" />
 
         <!-- 内容类型 -->
         <el-table-column label="类型" width="100" align="center">
