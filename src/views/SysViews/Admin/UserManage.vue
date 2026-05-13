@@ -118,7 +118,7 @@
             <el-button
                 size="mini"
                 type="text"
-                :disabled="row.username === 'admin'"
+                :disabled="row.role === 'ADMIN'"
             @click="handleDelete(row)">
               删除
             </el-button>
@@ -200,60 +200,6 @@
     </el-dialog>
 
     <!-- 批量导入弹窗 -->
-<!--    <el-dialog-->
-<!--        title="批量导入用户"-->
-<!--        :visible.sync="importDialogVisible"-->
-<!--        width="450px"-->
-<!--        :close-on-click-modal="false"-->
-<!--    >-->
-<!--      <el-alert-->
-<!--          title="导入说明"-->
-<!--          type="info"-->
-<!--          :closable="false"-->
-<!--          show-icon-->
-<!--          class="import-tip"-->
-<!--      >-->
-<!--        <template #default>-->
-<!--          <p>1. 请下载模板文件，按要求填写用户信息</p>-->
-<!--          <p>2. 密码列可选，不填则使用默认密码 123456</p>-->
-<!--          <p>3. 支持 .xlsx / .xls 格式，单次最多导入 100 条</p>-->
-<!--        </template>-->
-<!--      </el-alert>-->
-
-<!--      <el-form label-width="100px" style="margin-top: 20px">-->
-<!--        <el-form-item label="模板下载">-->
-<!--          <el-button type="text" icon="el-icon-download" @click="downloadTemplate">-->
-<!--            下载导入模板-->
-<!--          </el-button>-->
-<!--        </el-form-item>-->
-<!--        <el-form-item label="选择文件" prop="file">-->
-<!--          <el-upload-->
-<!--              ref="uploadRef"-->
-<!--              action="/admin/users/import"-->
-<!--          :headers="uploadHeaders"-->
-<!--          :before-upload="beforeUpload"-->
-<!--          :on-success="handleImportSuccess"-->
-<!--          :on-error="handleImportError"-->
-<!--          :auto-upload="false"-->
-<!--          :limit="1"-->
-<!--          accept=".xlsx,.xls"-->
-<!--          >-->
-<!--          <el-button size="small" type="primary">选择文件</el-button>-->
-<!--          <div slot="tip" class="el-upload__tip">-->
-<!--            只能上传 excel 文件，且不超过 5MB-->
-<!--          </div>-->
-<!--          </el-upload>-->
-<!--        </el-form-item>-->
-<!--      </el-form>-->
-
-<!--      <template #footer>-->
-<!--        <el-button @click="importDialogVisible = false">取 消</el-button>-->
-<!--        <el-button type="primary" :loading="importing" @click="submitImport">-->
-<!--          {{ importing ? '导入中...' : '开始导入' }}-->
-<!--        </el-button>-->
-<!--      </template>-->
-<!--    </el-dialog>-->
-    <!-- 批量导入弹窗 -->
     <el-dialog
         title="批量导入用户"
         :visible.sync="importDialogVisible"
@@ -274,15 +220,69 @@
         </template>
       </el-alert>
 
-      <div class="development-notice">
-        <i class="el-icon-warning-outline"></i>
-        <span>批量导入功能开发中，敬请期待...</span>
-      </div>
+      <el-form label-width="100px" style="margin-top: 20px">
+        <el-form-item label="模板下载">
+          <el-button type="text" icon="el-icon-download" @click="downloadTemplate">
+            下载导入模板
+          </el-button>
+        </el-form-item>
+        <el-form-item label="选择文件" prop="file">
+          <el-upload
+              ref="uploadRef"
+              action="/api/admin/users/import"
+          :headers="uploadHeaders"
+          :before-upload="beforeUpload"
+          :on-success="handleImportSuccess"
+          :on-error="handleImportError"
+          :auto-upload="false"
+          :limit="1"
+          accept=".csv,.xlsx,.xls"
+          >
+          <el-button size="small" type="primary">选择文件</el-button>
+          <div slot="tip" class="el-upload__tip">
+            只能上传 CSV/Excel 文件，且不超过 5MB
+          </div>
+          </el-upload>
+        </el-form-item>
+      </el-form>
 
       <template #footer>
-        <el-button @click="importDialogVisible = false">关 闭</el-button>
+        <el-button @click="importDialogVisible = false">取 消</el-button>
+        <el-button type="primary" :loading="importing" @click="submitImport">
+          {{ importing ? '导入中...' : '开始导入' }}
+        </el-button>
       </template>
     </el-dialog>
+    <!-- 批量导入弹窗（待开发） -->
+<!--    <el-dialog-->
+<!--        title="批量导入用户"-->
+<!--        :visible.sync="importDialogVisible"-->
+<!--        width="450px"-->
+<!--        :close-on-click-modal="false"-->
+<!--    >-->
+<!--      <el-alert-->
+<!--          title="导入说明"-->
+<!--          type="info"-->
+<!--          :closable="false"-->
+<!--          show-icon-->
+<!--          class="import-tip"-->
+<!--      >-->
+<!--        <template #default>-->
+<!--          <p>1. 请下载模板文件，按要求填写用户信息</p>-->
+<!--          <p>2. 密码列可选，不填则使用默认密码 123456</p>-->
+<!--          <p>3. 支持 .xlsx / .xls 格式，单次最多导入 100 条</p>-->
+<!--        </template>-->
+<!--      </el-alert>-->
+
+<!--      <div class="development-notice">-->
+<!--        <i class="el-icon-warning-outline"></i>-->
+<!--        <span>批量导入功能开发中，敬请期待...</span>-->
+<!--      </div>-->
+
+<!--      <template #footer>-->
+<!--        <el-button @click="importDialogVisible = false">关 闭</el-button>-->
+<!--      </template>-->
+<!--    </el-dialog>-->
 
     <!-- 重置密码弹窗 -->
     <el-dialog
@@ -421,6 +421,41 @@ export default {
     this.fetchUsers()
   },
   methods: {
+    handleImportSuccess(response) {
+      if (response.code === 1) {
+        const { successCount, failCount, errors } = response.data;
+        let msg = `导入完成：成功 ${successCount} 条，失败 ${failCount} 条`;
+        if (errors && errors.length > 0) {
+          msg += `\n失败原因：\n${errors.join('\n')}`;
+        }
+        this.$message.success(msg);
+        this.importDialogVisible = false;
+        this.fetchUsers();
+      } else {
+        this.$message.error(response.msg || '导入失败');
+      }
+    },
+
+    // beforeUpload 方法中，修复 MIME 类型判断
+    beforeUpload(file) {
+      // ✅ 正确判断 CSV/Excel 类型
+      const isCSV = file.type === 'text/csv' || file.name.toLowerCase().endsWith('.csv');
+      const isExcel = file.type === 'application/vnd.ms-excel' ||
+          file.type === 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' ||
+          file.name.toLowerCase().endsWith('.xlsx') ||
+          file.name.toLowerCase().endsWith('.xls');
+      const isLt5M = file.size / 1024 / 1024 < 5;
+
+      if (!isCSV && !isExcel) {
+        this.$message.error('只能上传 CSV 或 Excel 文件!')
+        return false
+      }
+      if (!isLt5M) {
+        this.$message.error('文件大小不能超过 5MB!')
+        return false
+      }
+      return true
+    },
     // ========== 数据加载 ==========
     // 获取用户列表
     async fetchUsers() {
@@ -659,7 +694,7 @@ export default {
     // 下载模板
     downloadTemplate() {
       // 方式 1：后端提供模板下载接口
-      window.open('/admin/users/template', '_blank')
+      window.open('/api/admin/users/template', '_blank')
 
       // 方式 2：前端静态文件（如果模板固定）
       // const link = document.createElement('a')
@@ -668,33 +703,6 @@ export default {
       // link.click()
     },
 
-    // 上传前校验
-    beforeUpload(file) {
-      const isExcel = file.type === 'application/vnd.malformations-office document.spreadsheet.sheet' ||
-          file.type === 'application/vnd.ms-excel'
-      const isLt5M = file.size / 1024 / 1024 < 5
-
-      if (!isExcel) {
-        this.$message.error('只能上传 Excel 文件!')
-        return false
-      }
-      if (!isLt5M) {
-        this.$message.error('文件大小不能超过 5MB!')
-        return false
-      }
-      return true
-    },
-
-    // 导入成功回调
-    handleImportSuccess(response) {
-      if (response.code === 1) {
-        this.$message.success(`导入成功，新增 ${response.data.successCount} 条，失败 ${response.data.failCount} 条`)
-        this.importDialogVisible = false
-        this.fetchUsers()
-      } else {
-        this.$message.error(response.msg || '导入失败')
-      }
-    },
 
     // 导入失败回调
     handleImportError() {

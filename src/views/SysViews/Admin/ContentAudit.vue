@@ -184,11 +184,14 @@
           <template #default="{ row }">
             <!-- 待审核状态显示审核按钮 -->
             <template v-if="row.result === 'PENDING'">
-              <el-button size="mini" type="success" @click="handleApprove(row)">
+              <el-button size="mini" type="text" @click="handleApprove(row)">
                 通过
               </el-button>
-              <el-button size="mini" type="danger" @click="openRejectDialog(row)">
+              <el-button size="mini" type="text" @click="openRejectDialog(row)">
                 拒绝
+              </el-button>
+              <el-button size="mini" type="text" @click="previewDetail(row)">
+                详情
               </el-button>
             </template>
             <!-- 已审核状态显示详情按钮 -->
@@ -385,6 +388,94 @@
       </template>
     </el-dialog>
 
+    <!-- 预览内容详情弹窗 -->
+    <el-dialog
+        title="内容详情"
+        :visible.sync="previewDetailDialogVisible"
+        width="600px"
+        :close-on-click-modal="false"
+    >
+      <el-descriptions :column="1" border>
+        <el-descriptions-item label="内容类型">
+          <el-tag :type="getTypeTagType(detailData.targetType)">
+            {{ getTypeText(detailData.targetType) }}
+          </el-tag>
+        </el-descriptions-item>
+
+        <!-- 资源详情 -->
+        <template v-if="detailData.targetType === 'RESOURCE'">
+          <el-descriptions-item label="资源标题">{{ detailData.resource?.title }}</el-descriptions-item>
+          <el-descriptions-item label="资源类型">{{ detailData.resource?.type }}</el-descriptions-item>
+          <el-descriptions-item label="文件链接">
+            <el-link :href="detailData.resource?.fileUrl" target="_blank" type="primary">
+              查看文件
+            </el-link>
+          </el-descriptions-item>
+          <el-descriptions-item label="所属课程">{{ detailData.resource?.courseName }}</el-descriptions-item>
+        </template>
+
+        <!-- 预览问答详情 -->
+        <template v-else-if="detailData.targetType === 'QA'">
+          <el-descriptions-item label="问题内容">{{ detailData.qa?.question }}</el-descriptions-item>
+          <el-descriptions-item label="回答内容">{{ detailData.qa?.answer || '暂无回答' }}</el-descriptions-item>
+          <el-descriptions-item label="是否匿名">
+            <el-tag :type="detailData.qa?.isAnonymous ? 'warning' : 'success'">
+              {{ detailData.qa?.isAnonymous ? '是' : '否' }}
+            </el-tag>
+          </el-descriptions-item>
+          <el-descriptions-item label="所属课程">{{ detailData.qa?.courseName }}</el-descriptions-item>
+        </template>
+
+        <!-- 作业详情 -->
+        <template v-else-if="detailData.targetType === 'SUBMISSION'">
+          <el-descriptions-item label="作业标题">{{ detailData.submission?.assignmentTitle }}</el-descriptions-item>
+          <el-descriptions-item label="提交类型">{{ detailData.submission?.contentType }}</el-descriptions-item>
+          <el-descriptions-item label="提交内容">
+            <el-link v-if="detailData.submission?.filePath" :href="detailData.submission.filePath" target="_blank">
+              下载文件
+            </el-link>
+            <span v-else-if="detailData.submission?.textContent">{{ truncateText(detailData.submission.textContent, 50) }}</span>
+            <span v-else>-</span>
+          </el-descriptions-item>
+          <el-descriptions-item label="是否迟交">
+            <el-tag :type="detailData.submission?.isLate ? 'danger' : 'success'">
+              {{ detailData.submission?.isLate ? '是' : '否' }}
+            </el-tag>
+          </el-descriptions-item>
+        </template>
+
+        <el-descriptions-item label="提交时间">{{ formatDateTime(detailData.submitTime || detailData.createTime || detailData.askTime) }}</el-descriptions-item>
+        <el-descriptions-item label="提交者">{{ detailData.submitter?.username }} ({{ getRoleText(detailData.submitter?.role) }})</el-descriptions-item>
+
+        <el-descriptions-item label="审核状态">
+          <el-tag :type="getStatusTagType(detailData.result)">
+            {{ getStatusText(detailData.result) }}
+          </el-tag>
+        </el-descriptions-item>
+        <el-descriptions-item label="拒绝原因" v-if="detailData.result === 'REJECT'">
+          {{ detailData.reason || '-' }}
+        </el-descriptions-item>
+      </el-descriptions>
+
+      <template #footer>
+        <el-button @click="previewDetailDialogVisible = false">关 闭</el-button>
+        <el-button
+            v-if="detailData.result === 'PENDING'"
+            type="success"
+            @click="handleApprove(detailData)"
+        >
+          通过审核
+        </el-button>
+        <el-button
+            v-if="detailData.result === 'PENDING'"
+            type="danger"
+            @click="openRejectDialog(detailData)"
+        >
+          拒绝审核
+        </el-button>
+      </template>
+    </el-dialog>
+
   </div>
 </template>
 
@@ -438,6 +529,7 @@ export default {
 
       // 详情弹窗
       detailDialogVisible: false,
+      previewDetailDialogVisible: false,
       detailData: {}
     }
   },
@@ -664,7 +756,14 @@ export default {
       // this.detailData = resp.data.data
       this.detailData = { ...row }  // 临时使用列表数据
     },
-
+    // 查看预览内容详情
+    async previewDetail(row) {
+      this.previewDetailDialogVisible = true
+      // 如果需要加载完整详情，可以调用接口
+      // const resp = await axios.get(`/api/admin/audit/${row.auditId}/detail`)
+      // this.detailData = resp.data.data
+      this.detailData = { ...row }  // 临时使用列表数据
+    },
     // ========== 工具方法 ==========
 
     // 类型中文显示
