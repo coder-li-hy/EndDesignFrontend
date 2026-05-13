@@ -80,7 +80,7 @@
                 type="text"
                 @click="viewSubmissions(row)"
             >
-              查看提交 ({{ row.submitCount || 0 }})
+              查看提交
             </el-button>
           </template>
         </el-table-column>
@@ -561,7 +561,7 @@ export default {
     async viewSubmissions(assignment) {
       this.currentAssignment = assignment
       this.submissionDialogVisible = true
-      this.fetchSubmissions(assignment.assignmentId)
+      await this.fetchSubmissions(assignment.assignmentId)
     },
 
     async fetchSubmissions(assignmentId) {

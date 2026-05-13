@@ -2,17 +2,17 @@
   <div class="system-config">
 
     <!-- 页面标题 + 操作按钮 -->
-    <div class="page-header">
-      <h2 class="page-title">系统配置</h2>
-      <div class="header-actions">
-        <el-button type="primary" icon="el-icon-plus" @click="openAddDialog">
-          添加配置
-        </el-button>
-        <el-button type="success" icon="el-icon-refresh" @click="handleRefresh">
-          刷新缓存
-        </el-button>
-      </div>
-    </div>
+<!--    <div class="page-header">-->
+<!--      <h2 class="page-title">系统配置</h2>-->
+<!--      <div class="header-actions">-->
+<!--        <el-button type="primary" icon="el-icon-plus" @click="openAddDialog">-->
+<!--          添加配置-->
+<!--        </el-button>-->
+<!--        <el-button type="success" icon="el-icon-refresh" @click="handleRefresh">-->
+<!--          刷新缓存-->
+<!--        </el-button>-->
+<!--      </div>-->
+<!--    </div>-->
 
     <!-- 搜索过滤区 -->
     <el-card class="filter-card" shadow="never">
