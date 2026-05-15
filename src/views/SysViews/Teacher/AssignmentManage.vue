@@ -6,7 +6,8 @@
       <div>
         <h2 class="page-title">作业管理</h2>
         <p class="course-info" v-if="courseName">
-          当前课程：<el-tag size="mini">{{ courseName }}</el-tag>
+          当前课程：
+          <el-tag size="mini">{{ courseName }}</el-tag>
         </p>
       </div>
       <el-button type="primary" icon="el-icon-plus" @click="openAddDialog">
@@ -45,7 +46,7 @@
     <el-card class="table-card" shadow="never">
       <el-table :data="assignmentList" v-loading="loading" border style="width: 100%">
 
-        <el-table-column prop="title" label="作业标题" min-width="180" show-overflow-tooltip />
+        <el-table-column prop="title" label="作业标题" min-width="180" show-overflow-tooltip/>
 
         <el-table-column label="截止时间" width="160" align="center">
           <template #default="{ row }">
@@ -152,17 +153,17 @@
           />
         </el-form-item>
 
-<!--        没有必要根据截止时间进行查询  -->
-<!--        <el-form-item label="截止时间" prop="deadline">-->
-<!--          <el-date-picker-->
-<!--              v-model="form.deadline"-->
-<!--              type="datetime"-->
-<!--              placeholder="选择截止日期时间"-->
-<!--              value-format="yyyy-MM-dd HH:mm:ss"-->
-<!--              style="width: 100%"-->
-<!--              :disabled-date="disabledDate"-->
-<!--          />-->
-<!--        </el-form-item>-->
+        <!--        没有必要根据截止时间进行查询  -->
+        <!--        <el-form-item label="截止时间" prop="deadline">-->
+        <!--          <el-date-picker-->
+        <!--              v-model="form.deadline"-->
+        <!--              type="datetime"-->
+        <!--              placeholder="选择截止日期时间"-->
+        <!--              value-format="yyyy-MM-dd HH:mm:ss"-->
+        <!--              style="width: 100%"-->
+        <!--              :disabled-date="disabledDate"-->
+        <!--          />-->
+        <!--        </el-form-item>-->
 
         <el-form-item label="允许迟交">
           <el-switch
@@ -201,7 +202,7 @@
       </div>
 
       <el-table :data="submissionList" v-loading="submissionLoading" border size="small">
-        <el-table-column prop="studentName" label="学生" width="120" />
+        <el-table-column prop="studentName" label="学生" width="120"/>
 
         <el-table-column label="提交时间" width="160" align="center">
           <template #default="{ row }">
@@ -232,7 +233,7 @@
                 <el-button size="mini" slot="reference" type="text">查看文本</el-button>
               </el-popover>
             </div>
-            <span v-else>-</span>
+            <span v-else><el-button size="mini" type="text" @click="viewCode(row)">查看代码</el-button></span>
           </template>
         </el-table-column>
 
@@ -259,6 +260,41 @@
       </el-table>
     </el-dialog>
 
+    <!--    &lt;!&ndash; 添加一个查看代码的弹窗 &ndash;&gt;-->
+    <!--    <el-dialog itle="查看提交代码" :visible.sync="codeDialogVisible" width="60%">-->
+    <!--      <pre v-highlight class="code-block">{{ currentSubmissionContent }}</pre>-->
+    <!--      <div slot="footer">-->
+    <!--        <el-button @click="codeDialogVisible = false">关 闭</el-button>-->
+    <!--      </div>-->
+    <!--    </el-dialog>-->
+
+    <!-- 查看代码的弹窗 -->
+    <el-dialog
+        title="查看提交代码"
+        :visible.sync="codeDialogVisible"
+        width="70%"
+        :close-on-click-modal="false"
+    >
+      <div style="margin-bottom: 10px">
+        <el-tag size="mini">学生：{{ currentSubmission?.studentName }}</el-tag>
+        <el-tag size="mini" type="success" style="margin-left: 10px">
+          提交时间：{{ formatDateTime(currentSubmission?.submitTime) }}
+        </el-tag>
+        <el-tag size="mini" :type="currentSubmission?.isLate ? 'danger' : 'info'" style="margin-left: 10px">
+          {{ currentSubmission?.isLate ? '迟交' : '按时' }}
+        </el-tag>
+      </div>
+      <!--    &lt;!&ndash; 添加一个查看代码的弹窗 &ndash;&gt;-->
+      <pre v-highlight class="code-block">{{ currentSubmissionContent }}</pre>
+      <div slot="footer">
+        <el-button @click="codeDialogVisible = false">关 闭</el-button>
+      </div>
+
+      <!--      <div slot="footer">-->
+      <!--        <el-button @click="codeDialogVisible = false">关 闭</el-button>-->
+      <!--      </div>-->
+    </el-dialog>
+
     <!-- 批改弹窗 -->
     <el-dialog
         title="批改作业"
@@ -269,7 +305,7 @@
       <el-form :model="gradeForm" :rules="gradeRules" ref="gradeFormRef" label-width="100px">
 
         <el-form-item label="学生">
-          <el-input :value="gradeForm.studentName" disabled />
+          <el-input :value="gradeForm.studentName" disabled/>
         </el-form-item>
 
         <el-form-item label="提交内容" v-if="gradeForm.contentType === 'TEXT'">
@@ -360,14 +396,14 @@ export default {
       },
       rules: {
         title: [
-          { required: true, message: '请输入作业标题', trigger: 'blur' },
-          { min: 2, max: 100, message: '长度在 2 到 100 个字符', trigger: 'blur' }
+          {required: true, message: '请输入作业标题', trigger: 'blur'},
+          {min: 2, max: 100, message: '长度在 2 到 100 个字符', trigger: 'blur'}
         ],
         description: [
-          { required: true, message: '请输入作业要求', trigger: 'blur' }
+          {required: true, message: '请输入作业要求', trigger: 'blur'}
         ],
         deadline: [
-          { required: true, message: '请选择截止时间', trigger: 'change' }
+          {required: true, message: '请选择截止时间', trigger: 'change'}
         ]
       },
 
@@ -377,6 +413,10 @@ export default {
       currentAssignment: null,
       submissionList: [],
 
+      // 查看代码弹窗
+      codeDialogVisible: false,
+      currentSubmission: null,
+      currentSubmissionContent: '',
       // 批改弹窗
       gradeDialogVisible: false,
       grading: false,
@@ -391,12 +431,13 @@ export default {
       },
       gradeRules: {
         score: [
-          { required: true, message: '请输入分数', trigger: 'blur' },
-          { type: 'number', min: 0, max: 100, message: '分数范围 0-100', trigger: 'blur' }
+          {required: true, message: '请输入分数', trigger: 'blur'},
+          {type: 'number', min: 0, max: 100, message: '分数范围 0-100', trigger: 'blur'}
         ]
       }
     }
   },
+
 
   created() {
     // 获取课程参数（从"我的课程"页面跳转时携带）
@@ -411,6 +452,37 @@ export default {
   },
 
   methods: {
+
+    // 查看代码
+    viewCode(row) {
+      this.currentSubmission = row
+      this.currentSubmissionContent = row.textContent || ''
+      this.codeDialogVisible = true
+    },
+
+    // 根据提交类型返回语言标识
+    getCodeLanguage(contentType) {
+      const map = {
+        'CODE': 'c',      // 默认用 C，可根据实际调整
+        'TEXT': 'plaintext',
+        'FILE': 'plaintext'
+      }
+      return map[contentType] || 'plaintext'
+    },
+
+    // 打开批改弹窗时也可以查看代码
+    // openGradeDialog(submission) {
+    //   this.gradeForm = {
+    //     submissionId: submission.submissionId,
+    //     studentName: submission.studentName,
+    //     contentType: submission.contentType,
+    //     filePath: submission.filePath,
+    //     textContent: submission.textContent,
+    //     score: submission.score,
+    //     teacherComment: submission.teacherComment || ''
+    //   }
+    //   this.gradeDialogVisible = true
+    // },
     // 查看作业学习进度
     viewProgress(row) {
       this.$router.push({
@@ -459,13 +531,20 @@ export default {
 
     // 重置搜索
     handleReset() {
-      this.searchForm = { title: '', deadline: '' }
+      this.searchForm = {title: '', deadline: ''}
       this.handleSearch()
     },
 
     // 分页
-    handlePageChange(p) { this.page = p; this.fetchAssignments() },
-    handleSizeChange(s) { this.size = s; this.page = 1; this.fetchAssignments() },
+    handlePageChange(p) {
+      this.page = p;
+      this.fetchAssignments()
+    },
+    handleSizeChange(s) {
+      this.size = s;
+      this.page = 1;
+      this.fetchAssignments()
+    },
 
     // ========== 作业管理 ==========
 
@@ -482,7 +561,11 @@ export default {
     },
 
     async handleSubmit() {
-      try { await this.$refs.formRef.validate() } catch { return }
+      try {
+        await this.$refs.formRef.validate()
+      } catch {
+        return
+      }
 
       this.submitting = true
       try {
@@ -518,7 +601,9 @@ export default {
       if (this.$refs.formRef) this.$refs.formRef.resetFields()
     },
 
-    handleDialogClose() { this.resetForm() },
+    handleDialogClose() {
+      this.resetForm()
+    },
 
     // 删除作业
     handleDelete(row) {
@@ -599,7 +684,11 @@ export default {
 
     // 提交批改
     async submitGrade() {
-      try { await this.$refs.gradeFormRef.validate() } catch { return }
+      try {
+        await this.$refs.gradeFormRef.validate()
+      } catch {
+        return
+      }
 
       this.grading = true
       try {

@@ -24,6 +24,7 @@
           <el-select v-model="searchForm.status" placeholder="全部" clearable>
             <el-option label="开放中" value="OPEN" />
             <el-option label="已结课" value="CLOSED" />
+            <el-option label="已结束" value="ENDED" />
           </el-select>
         </el-form-item>
         <el-form-item>
@@ -55,7 +56,7 @@
         <el-table-column prop="status" label="状态" width="100" align="center">
           <template #default="{ row }">
             <el-tag :type="row.status === 'OPEN' ? 'success' : 'info'" size="mini">
-              {{ row.status === 'OPEN' ? '开放中' : '已结课' }}
+              {{ row.status === 'OPEN' ? '开放中' : '已结' }}
             </el-tag>
           </template>
         </el-table-column>

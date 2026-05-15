@@ -83,6 +83,7 @@
           <el-radio-group v-model="submitForm.contentType" @change="handleContentTypeChange">
             <el-radio label="TEXT">文本内容</el-radio>
             <el-radio label="FILE">上传文件</el-radio>
+            <el-radio label="CODE">代码</el-radio>
           </el-radio-group>
         </el-form-item>
 
@@ -98,6 +99,21 @@
               :rows="6"
               placeholder="请输入作业内容..."
               maxlength="2000"
+              show-word-limit
+          />
+        </el-form-item>
+
+        <!-- 代码内容输入 -->
+        <el-form-item
+            v-else-if="submitForm.contentType === 'CODE'"
+            label="代码"
+            prop="textContent"
+        >
+          <el-input
+              v-model="submitForm.textContent"
+              type="textarea"
+              :rows="6"
+              placeholder="请输入代码内容..."
               show-word-limit
           />
         </el-form-item>
@@ -118,7 +134,7 @@
               :file-list="fileList"
               :limit="1"
               accept=".pdf,.doc,.docx,.txt,.zip,.rar"
-              :auto-upload="false"
+              :auto-upload="true"
           >
             <el-button size="small" type="primary">选择文件</el-button>
             <div slot="tip" class="el-upload__tip">
