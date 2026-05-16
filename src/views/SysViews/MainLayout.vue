@@ -48,18 +48,20 @@
       <!-- 主内容区 - 路由出口 -->
       <el-main class="main-content">
         <!-- ⭐ 核心：所有子页面在这里渲染 -->
-        <router-view :key="$route.fullPath" />
+        <router-view :key="$route.fullPath"/>
       </el-main>
 
     </el-container>
+    <AiAssistant/>
   </el-container>
 </template>
 
 <script>
 import SideMenu from '@/views/SysViews/SideMenu'
+import AiAssistant from '@/views/SysViews/AiAssistant.vue'  // ⭐ 引入组件
 
 export default {
-  components: { SideMenu },
+  components: {AiAssistant, SideMenu},
 
   data() {
     return {
@@ -75,13 +77,13 @@ export default {
 
     // 角色中文显示
     roleText() {
-      const map = { 'ADMIN': '管理员', 'TEACHER': '教师', 'STUDENT': '学生' }
+      const map = {'ADMIN': '管理员', 'TEACHER': '教师', 'STUDENT': '学生'}
       return map[this.userInfo.role] || this.userInfo.role
     },
 
     // 角色标签颜色
     roleTagType() {
-      const map = { 'ADMIN': 'danger', 'TEACHER': 'warning', 'STUDENT': 'success' }
+      const map = {'ADMIN': 'danger', 'TEACHER': 'warning', 'STUDENT': 'success'}
       return map[this.userInfo.role] || 'info'
     }
   },
@@ -92,7 +94,7 @@ export default {
         this.handleLogout()
       } else if (command === 'profile') {
         this.$router.push('/profile')
-      }else if (command === 'notifications') {
+      } else if (command === 'notifications') {
         // ⭐ 跳转到通知页面
         this.$router.push('/notifications')
       }
@@ -184,8 +186,7 @@ export default {
   font-size: 14px;
 }
 </style>
- src/views/SysViews/MainLayout.vue
-
+src/views/SysViews/MainLayout.vue
 
 
 <!--测试用MainLayout-->

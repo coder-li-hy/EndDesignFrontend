@@ -13,6 +13,7 @@
     "echarts": "^6.0.0",
     "element-ui": "^2.15.14",
     "highlight.js": "^11.11.1",
+    "markdown-it": "^14.1.1",
     "monaco-editor": "^0.55.1",
     "qs": "^6.12.0",
     "vue": "^2.6.14",
