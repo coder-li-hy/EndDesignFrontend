@@ -1,640 +1,392 @@
 <template>
-  <div class="notification-list">
-
-    <!-- 页面标题 -->
-    <div class="page-header">
-      <div>
-        <h2 class="page-title">🔔 我的通知</h2>
-        <p class="page-subtitle">系统消息与课程通知，重要信息不错过</p>
-      </div>
-      <div class="header-actions">
-        <el-tag size="mini" effect="dark" type="primary" class="count-tag">
-          📬 共 {{ total }} 条
-        </el-tag>
-        <el-button
-            size="small"
-            icon="el-icon-refresh"
-            @click="fetchNotifications"
-            :loading="loading"
-            class="refresh-btn"
-        >
-          刷新
-        </el-button>
-      </div>
-    </div>
-
-    <!-- 通知筛选 -->
-    <el-card class="filter-card" shadow="hover" v-if="notifyList.length > 0">
-      <el-form :inline="true" size="small">
+  <div class="notification-page">
+    <!-- 筛选区域 -->
+    <el-card class="filter-card" shadow="never">
+      <el-form :inline="true" :model="filters" size="small">
         <el-form-item label="类型">
-          <el-select v-model="filterType" placeholder="全部" clearable @change="fetchNotifications" style="width: 120px">
-            <el-option label="🔴 系统通知" value="SYSTEM"/>
-            <el-option label="🔵 课程通知" value="COURSE"/>
+          <el-select v-model="filters.type" placeholder="全部" clearable @change="handleFilter">
+            <el-option label="系统通知" value="SYSTEM"/>
+            <el-option label="课程通知" value="COURSE"/>
           </el-select>
+        </el-form-item>
+
+        <el-form-item>
+          <el-checkbox v-model="filters.unreadOnly" @change="handleFilter">只看未读</el-checkbox>
+        </el-form-item>
+
+        <el-form-item>
+          <el-button type="primary" icon="el-icon-refresh" @click="fetchNotifications">刷新</el-button>
+          <el-button v-if="hasUnread" type="success" icon="el-icon-check" @click="markAllRead">
+            全部已读
+          </el-button>
         </el-form-item>
       </el-form>
     </el-card>
 
+
+
     <!-- 通知列表 -->
-    <div class="notify-wrapper" v-loading="loading">
-
-      <el-card
-          class="notify-card"
-          shadow="hover"
-          v-for="notify in notifyList"
-          :key="notify.notifyId"
-          @click="viewDetail(notify)"
-      >
-        <!-- 卡片头部 -->
-        <div class="notify-header">
-          <div class="notify-type">
-            <el-tag
-                size="mini"
-                :type="notify.type === 'SYSTEM' ? 'danger' : 'primary'"
-                :effect="notify.type === 'SYSTEM' ? 'dark' : 'light'"
-                class="type-tag"
-            >
-              {{ notify.type === 'SYSTEM' ? '🔴 系统' : '🔵 课程' }}
-            </el-tag>
-          </div>
-          <div class="notify-time">
-            <i class="el-icon-time"></i>
-            {{ formatDateTime(notify.publishTime) }}
-          </div>
-        </div>
-
-        <!-- 通知标题 -->
-        <h3 class="notify-title">{{ notify.title }}</h3>
-
-        <!-- 通知内容（截断显示） -->
-        <div class="notify-content">
-          {{ notify.content }}
-        </div>
-
-        <!-- 课程名称（如果有） -->
-        <div v-if="notify.courseName" class="notify-course">
-          <i class="el-icon-s-order"></i>
-          <span>相关课程：</span>
-          <el-tag size="mini" effect="plain">{{ notify.courseName }}</el-tag>
-        </div>
-
-        <!-- 卡片底部：查看详情 -->
-        <div class="notify-footer">
-          <el-button
-              size="mini"
-              type="text"
-              class="action-detail"
-              @click.stop="viewDetail(notify)"
-          >
-            查看详情 <i class="el-icon-arrow-right"></i>
-          </el-button>
-        </div>
-      </el-card>
-
-      <!-- 空状态 -->
-      <el-empty
-          v-if="notifyList.length === 0 && !loading"
-          :image-size="150"
-          description="🎉 暂无新通知，好好享受学习时光～"
-          class="empty-state"
-      >
-        <el-button type="primary" @click="fetchNotifications" icon="el-icon-refresh">
-          刷新列表
-        </el-button>
-      </el-empty>
-
-    </div>
-
-    <!-- 分页 -->
-    <div class="pagination-wrapper" v-if="total > size">
-      <el-pagination
-          @current-change="handlePageChange"
-          @size-change="handleSizeChange"
-          :current-page="page"
-          :page-size="size"
-          :total="total"
-          layout="total, prev, pager, next, jumper"
-          background
-          :pager-count="5"
-      />
-    </div>
-
-    <!-- 通知详情弹窗 -->
-    <el-dialog
-        title="📋 通知详情"
-        :visible.sync="detailDialogVisible"
-        width="520px"
-        :close-on-click-modal="false"
-        class="dialog-custom"
-        @closed="onDetailClose"
-    >
-      <div v-if="currentNotify" class="detail-wrapper">
-        <!-- 头部信息 -->
-        <div class="detail-header">
-          <el-tag
-              size="medium"
-              :type="currentNotify.type === 'SYSTEM' ? 'danger' : 'primary'"
-              :effect="currentNotify.type === 'SYSTEM' ? 'dark' : 'light'"
-              class="detail-type-tag"
-          >
-            {{ currentNotify.type === 'SYSTEM' ? '🔴 系统通知' : '🔵 课程通知' }}
-          </el-tag>
-          <span class="detail-time">
-            <i class="el-icon-time"></i>
-            {{ formatDateTime(currentNotify.publishTime) }}
-          </span>
-        </div>
-
-        <!-- 标题 -->
-        <h3 class="detail-title">{{ currentNotify.title }}</h3>
-
-        <!-- 内容区域 -->
-        <div class="detail-content" v-html="formatContent(currentNotify.content)"></div>
-
-        <!-- 相关课程 -->
-        <div v-if="currentNotify.courseName" class="detail-course">
-          <i class="el-icon-s-order"></i>
-          <strong>相关课程：</strong>
-          <el-tag size="mini" effect="dark" type="primary">{{ currentNotify.courseName }}</el-tag>
-        </div>
+    <el-card class="list-card" shadow="never">
+      <div v-if="loading" class="loading">
+        <el-skeleton :rows="5" animated/>
       </div>
 
-      <template #footer>
-        <el-button @click="detailDialogVisible = false">关 闭</el-button>
-      </template>
-    </el-dialog>
+      <el-empty v-else-if="notifications.length === 0" description="暂无通知"/>
 
+      <div v-else>
+        <div
+            v-for="item in notifications"
+            :key="item.notify_id"
+            class="notification-item"
+            :class="{ 'unread': !item.is_read }"
+            @click="handleClick(item)"
+        >
+          <div class="item-header">
+            <el-tag size="mini" :type="item.type === 'SYSTEM' ? 'danger' : 'warning'">
+              {{ item.type === 'SYSTEM' ? '系统' : '课程' }}
+            </el-tag>
+            <span class="item-title">{{ item.title }}</span>
+            <span v-if="!item.is_read" class="unread-dot">●</span>
+          </div>
+
+          <div class="item-meta">
+            <span class="publisher">{{ item.publisher_name || '系统' }}</span>
+            <span class="time">{{ formatTime(item.publish_time) }}</span>
+<!--            <span v-if="item.course_id && item.course_id !== 0" class="course-tag">-->
+<!--              [课程#{{ item.course_id }}]-->
+<!--            </span>-->
+          </div>
+
+          <div class="item-content" v-html="truncateContent(item.content)"/>
+        </div>
+
+        <!-- 分页 -->
+        <el-pagination
+            class="pagination"
+            @size-change="handleSizeChange"
+            @current-change="handlePageChange"
+            :current-page="pagination.page"
+            :page-sizes="[10, 20, 50]"
+            :page-size="pagination.size"
+            layout="total, sizes, prev, pager, next, jumper"
+            :total="pagination.total"/>
+      </div>
+    </el-card>
+
+    <!-- 通知详情弹窗（点击时展示完整内容） -->
+    <el-dialog
+        title="通知详情"
+        :visible.sync="detailVisible"
+        width="600px"
+        :close-on-click-modal="false">
+      <div v-if="currentDetail" class="detail-content">
+        <div class="detail-header">
+          <h3>{{ currentDetail.title }}</h3>
+          <div class="detail-meta">
+            <el-tag size="mini" :type="currentDetail.type === 'SYSTEM' ? 'danger' : 'warning'">
+              {{ currentDetail.type === 'SYSTEM' ? '系统通知' : '课程通知' }}
+            </el-tag>
+            <span>发布：{{ currentDetail.publisher_name }}</span>
+            <span>时间：{{ formatTime(currentDetail.publish_time) }}</span>
+          </div>
+        </div>
+        <div class="detail-body" v-html="currentDetail.content"/>
+      </div>
+      <span slot="footer" class="dialog-footer">
+        <el-button @click="detailVisible = false">关闭</el-button>
+        <el-button v-if="currentDetail && !currentDetail.is_read"
+                   type="primary" @click="markSingleRead(currentDetail.notify_id)">
+          标记为已读
+        </el-button>
+      </span>
+    </el-dialog>
   </div>
 </template>
 
 <script>
 import axios from 'axios'
-
 export default {
   name: 'NotificationList',
 
   data() {
     return {
-      userId: null,
-      role: null,
-
-      page: 1,
-      size: 10,
-      total: 0,
-      notifyList: [],
       loading: false,
+      notifications: [],
+      pagination: { page: 1, size: 10, total: 0 },
+      filters: { type: '', courseId: '', unreadOnly: false },
+      myCourses: [], // 当前用户选的课程列表
+      hasUnread: false,
 
-      // 筛选条件
-      filterType: '',
+      detailVisible: false,
+      currentDetail: null
+    }
+  },
 
-      // 详情弹窗
-      detailDialogVisible: false,
-      currentNotify: null
+  computed: {
+    // 判断是否为学生/教师（用于显示课程筛选）
+    isStudentOrTeacher() {
+      const role = JSON.parse(sessionStorage.getItem('userInfo'))?.role
+      return role === 'STUDENT' || role === 'TEACHER'
     }
   },
 
   created() {
-    const userInfo = JSON.parse(sessionStorage.getItem('userInfo') || '{}')
-    this.userId = userInfo.userId
-    this.role = userInfo.role
+    this.fetchNotifications()
+    this.fetchUnreadCount()
 
-    if (this.userId) {
-      this.fetchNotifications()
-    }
+
   },
 
   methods: {
-    // 获取通知列表
+    // 🔄 获取通知列表
     async fetchNotifications() {
-      if (!this.userId) return
-
       this.loading = true
       try {
-        const resp = await axios.get('/api/notifications/my', {
-          params: {
-            userId: this.userId,
-            role: this.role,
-            type: this.filterType || undefined,
-            page: this.page,
-            size: this.size
-          }
-        })
-        if (resp.data.code === 1) {
-          this.notifyList = resp.data.data.list || []
-          this.total = resp.data.data.total || 0
+        const params = {
+          page: this.pagination.page,
+          size: this.pagination.size,
+          ...this.filters
         }
-      } catch (e) {
-        console.error('Fetch notifications error:', e)
-        this.$message.error('加载通知列表失败')
+        // 过滤空值
+        Object.keys(params).forEach(k => !params[k] && params[k] !== 0 && delete params[k])
+
+        const { data } = await axios.get('/api/notifications/my', { params })
+        if (data.code === 1) {
+          this.notifications = data.data.records || []
+          this.pagination.total = data.data.total || 0
+        }
+      } catch (err) {
+        this.$message.error('加载通知失败')
+        console.error(err)
       } finally {
         this.loading = false
       }
     },
 
-    // 分页处理
-    handlePageChange(p) { this.page = p; this.fetchNotifications() },
-    handleSizeChange(s) { this.size = s; this.page = 1; this.fetchNotifications() },
-
-    // 格式化时间
-    formatDateTime(dateTime) {
-      if (!dateTime) return '-'
-      const date = new Date(dateTime)
-      const now = new Date()
-      const isToday = date.toDateString() === now.toDateString()
-      const h = String(date.getHours()).padStart(2, '0')
-      const m = String(date.getMinutes()).padStart(2, '0')
-      return isToday ? `今天 ${h}:${m}` : `${date.getMonth()+1}-${date.getDate()} ${h}:${m}`
+    // 🔔 获取未读数量（更新红点）
+    async fetchUnreadCount() {
+      try {
+        const { data } = await axios.get('/api/notifications/unread-count')
+        this.hasUnread = data.code === 1 && data.data > 0
+        // 🔄 通知主布局更新红点（事件总线或 Vuex）
+        this.$emit('unread-count-change', data.data || 0)
+      } catch (e) { console.error(e) }
     },
 
-    // 格式化内容（支持简单换行 + 防 XSS）
-    formatContent(content) {
+    // 📚 获取我的课程（用于筛选）
+    async fetchMyCourses() {
+      try {
+        const { data } = await axios.get('/api/courses/my') // 需你实现该接口
+        if (data.code === 200) {
+          this.myCourses = data.data || []
+        }
+      } catch (e) { console.error(e) }
+    },
+
+    // 🔍 筛选条件变化时重置页码并刷新
+    handleFilter() {
+      this.pagination.page = 1
+      this.fetchNotifications()
+    },
+
+    // 📄 分页处理
+    handlePageChange(page) {
+      this.pagination.page = page
+      this.fetchNotifications()
+    },
+    handleSizeChange(size) {
+      this.pagination.size = size
+      this.pagination.page = 1
+      this.fetchNotifications()
+    },
+
+    // 标记单条已读
+    async markSingleRead(notifyId) {
+      try {
+        await axios.post(`/api/notifications/${notifyId}/read`)
+        // 本地更新 + 重新拉取未读数
+        const item = this.notifications.find(n => n.notify_id === notifyId)
+        if (item) {
+          item.is_read = true
+          item.read_time = new Date().toISOString()
+        }
+        if (this.currentDetail?.notify_id === notifyId) {
+          this.currentDetail.is_read = true
+        }
+        this.fetchUnreadCount()
+        this.$message.success('已标记为已读')
+      } catch (e) {
+        this.$message.error('操作失败')
+      }
+    },
+
+    // 批量标记全部已读（当前筛选条件下）
+    async markAllRead() {
+      this.$confirm('确定将当前列表的通知全部标记为已读？', '提示', { type: 'warning' })
+          .then(async () => {
+            try {
+              // 方案1：逐条调用（简单）
+              const unreadIds = this.notifications.filter(n => !n.is_read).map(n => n.notify_id)
+              for (const id of unreadIds) {
+                await axios.post(`/api/notifications/${id}/read`)
+              }
+              // 刷新
+              this.fetchNotifications()
+              this.fetchUnreadCount()
+              this.$message.success('全部标记成功')
+            } catch (e) {
+              this.$message.error('批量操作失败')
+            }
+          })
+    },
+
+    // 👆 点击通知项：打开详情 + 自动标记已读
+    handleClick(item) {
+      this.currentDetail = { ...item }
+      this.detailVisible = true
+
+      // 如果未读，自动标记（提升体验）
+      if (!item.is_read) {
+        this.markSingleRead(item.notify_id) // 静默执行，不弹提示
+      }
+    },
+
+    // 内容截断（列表页展示）
+    truncateContent(content, len = 120) {
       if (!content) return ''
-      return content
-          .replace(/&/g, '&amp;')
-          .replace(/</g, '&lt;')
-          .replace(/>/g, '&gt;')
-          .replace(/\n/g, '<br>')
+      // 去除 HTML 标签后截断
+      const text = content.replace(/<[^>]+>/g, '')
+      return text.length > len ? text.slice(0, len) + '...' : text
     },
 
-    // 查看详情
-    viewDetail(notify) {
-      this.currentNotify = { ...notify }
-      this.detailDialogVisible = true
-    },
+    // 时间格式化
+    formatTime(timeStr) {
+      if (!timeStr) return ''
+      const date = new Date(timeStr)
+      const now = new Date()
+      const diff = (now - date) / 1000 // 秒
 
-    // 详情弹窗关闭回调
-    onDetailClose() {
-      this.currentNotify = null
+      if (diff < 60) return '刚刚'
+      if (diff < 3600) return `${Math.floor(diff/60)}分钟前`
+      if (diff < 86400) return `${Math.floor(diff/3600)}小时前`
+      return date.toLocaleString('zh-CN', {
+        month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit'
+      })
     }
   }
 }
 </script>
 
 <style scoped>
-/* ========== 页面整体样式 ========== */
-.notification-list {
+.notification-page {
   padding: 0;
-  min-height: 100vh;
-  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
 }
 
-.page-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  margin: 20px;
-  padding: 0 10px;
-  gap: 12px;
-  flex-wrap: wrap;
+.filter-card {
+  margin-bottom: 16px;
 }
 
-.page-title {
-  font-size: 22px;
-  font-weight: 700;
-  color: #303133;
-  margin: 0 0 4px 0;
-  display: flex;
-  align-items: center;
-  gap: 8px;
+.list-card {
+  min-height: 400px;
 }
 
-.page-subtitle {
-  margin: 0;
-  font-size: 13px;
-  color: #909399;
+.loading {
+  padding: 20px;
 }
 
-.header-actions {
+.notification-item {
+  padding: 16px;
+  border-bottom: 1px solid #eee;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.notification-item:hover {
+  background: #f9fafc;
+}
+
+.notification-item.unread {
+  background: #f0f9ff;
+  border-left: 3px solid #409EFF;
+}
+
+.item-header {
   display: flex;
   align-items: center;
   gap: 10px;
-  flex-wrap: wrap;
+  margin-bottom: 8px;
 }
 
-.count-tag {
-  font-size: 13px;
-}
-
-.refresh-btn {
-  padding: 8px 16px;
-}
-
-/* ========== 筛选卡片 ========== */
-.filter-card {
-  margin: 0 20px 16px 20px;
-  border-radius: 12px;
-}
-
-/* ========== 通知列表包装器 ========== */
-.notify-wrapper {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  padding: 0 20px 20px;
-}
-
-/* ========== 通知卡片 ========== */
-.notify-card {
-  border-radius: 12px;
-  transition: all 0.2s ease;
-  cursor: pointer;
-}
-
-.notify-card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12) !important;
-}
-
-/* 卡片头部 */
-.notify-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 12px;
-  padding-bottom: 10px;
-  border-bottom: 1px dashed #ebeef5;
-}
-
-.type-tag {
-  font-size: 11px;
-  padding: 2px 8px;
-}
-
-.notify-time {
-  font-size: 12px;
-  color: #909399;
-  display: flex;
-  align-items: center;
-  gap: 4px;
-}
-
-.notify-time i {
-  font-size: 11px;
-}
-
-/* 通知标题 */
-.notify-title {
-  font-size: 15px;
-  font-weight: 600;
-  color: #303133;
-  margin: 0 0 10px 0;
-  line-height: 1.4;
-}
-
-/* 通知内容 */
-.notify-content {
-  font-size: 14px;
-  color: #606266;
-  line-height: 1.6;
-  margin-bottom: 12px;
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-/* 相关课程 */
-.notify-course {
-  font-size: 13px;
-  color: #909399;
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  margin-bottom: 12px;
-}
-
-.notify-course i {
-  font-size: 12px;
-}
-
-/* 卡片底部操作 */
-.notify-footer {
-  display: flex;
-  justify-content: flex-end;
-  padding-top: 10px;
-  border-top: 1px dashed #ebeef5;
-}
-
-.action-detail {
-  color: #909399;
-  font-size: 12px;
-  padding: 4px 8px;
-}
-
-.action-detail:hover {
-  color: #409eff;
+.item-title {
   font-weight: 500;
+  font-size: 15px;
+  color: #303133;
+  flex: 1;
 }
 
-.action-detail i {
-  margin-left: 2px;
-  font-size: 11px;
-  transition: transform 0.2s;
-}
-
-.action-detail:hover i {
-  transform: translateX(2px);
-}
-
-/* ========== 空状态 ========== */
-.empty-state {
-  padding: 60px 0;
-}
-
-.empty-state ::v-deep .el-empty__description {
-  font-size: 14px;
-  color: #909399;
-}
-
-/* ========== 分页 ========== */
-.pagination-wrapper {
-  display: flex;
-  justify-content: flex-end;
-  padding: 0 20px 20px;
-}
-
-/* ========== 详情弹窗 ========== */
-.dialog-custom ::v-deep .el-dialog {
-  border-radius: 16px;
-  overflow: hidden;
-}
-
-.dialog-custom ::v-deep .el-dialog__header {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  padding: 18px 24px;
-  margin: 0;
-}
-
-.dialog-custom ::v-deep .el-dialog__title {
-  color: white;
-  font-weight: 600;
-  font-size: 16px;
-}
-
-.dialog-custom ::v-deep .el-dialog__headerbtn {
-  top: 16px;
-}
-
-.dialog-custom ::v-deep .el-dialog__headerbtn .el-dialog__close {
-  color: white;
-}
-
-.dialog-custom ::v-deep .el-dialog__body {
-  padding: 20px 24px;
-  background: #fff;
-}
-
-.dialog-custom ::v-deep .el-dialog__footer {
-  padding: 16px 24px 24px;
-  border-top: 1px solid #ebeef5;
-}
-
-.detail-wrapper {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-}
-
-.detail-header {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding-bottom: 12px;
-  border-bottom: 1px solid #ebeef5;
-}
-
-.detail-type-tag {
+.unread-dot {
+  color: #F56C6C;
   font-size: 12px;
-  padding: 6px 12px;
+  animation: pulse 1.5s infinite;
 }
 
-.detail-time {
-  font-size: 13px;
+@keyframes pulse {
+  0% { opacity: 1; }
+  50% { opacity: 0.4; }
+  100% { opacity: 1; }
+}
+
+.item-meta {
+  font-size: 12px;
   color: #909399;
+  margin-bottom: 8px;
   display: flex;
-  align-items: center;
-  gap: 4px;
+  gap: 12px;
 }
 
-.detail-title {
-  font-size: 18px;
-  font-weight: 600;
-  color: #303133;
-  margin: 0;
-  line-height: 1.4;
-}
-
-.detail-content {
-  font-size: 14px;
-  color: #303133;
-  line-height: 1.8;
-  white-space: pre-wrap;
-  word-break: break-word;
-}
-
-.detail-course {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  font-size: 13px;
-  color: #666;
-  padding: 10px 14px;
-  background: #f8f9fa;
-  border-radius: 8px;
-  border-left: 3px solid #409eff;
-}
-
-/* ========== 响应式适配 ========== */
-@media (max-width: 768px) {
-  .page-header {
-    flex-direction: column;
-    align-items: flex-start;
-  }
-
-  .header-actions {
-    width: 100%;
-    justify-content: flex-start;
-  }
-
-  .filter-card {
-    margin: 0 10px 16px 10px;
-  }
-
-  .notify-wrapper {
-    padding: 0 10px 20px;
-  }
-
-  .notify-card {
-    border-radius: 10px;
-  }
-
-  .notify-header {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 8px;
-  }
-
-  .notify-footer {
-    justify-content: flex-start;
-  }
-
-  .pagination-wrapper {
-    padding: 0 10px 20px;
-  }
-}
-
-/* ========== Element UI 深度定制 ========== */
-.el-card {
-  border-radius: 12px;
-  border: none;
-}
-
-.el-card ::v-deep .el-card__body {
-  padding: 16px;
-}
-
-.el-tag {
-  border-radius: 12px;
-}
-
-.el-input >>> .el-input__inner {
-  border-radius: 8px;
-  border: 1px solid #dcdfe6;
-  height: 36px;
-  font-size: 13px;
-}
-
-.el-input >>> .el-input__inner:focus {
-  border-color: #667eea;
-  box-shadow: 0 0 0 2px rgba(102, 126, 234, 0.2);
-}
-
-.el-select >>> .el-input__inner {
-  border-radius: 8px;
-  height: 36px;
-}
-
-.el-message {
-  z-index: 9999 !important;
-}
-
-/* 全局滚动条美化 */
-::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
-}
-
-::-webkit-scrollbar-track {
-  background: transparent;
-}
-
-::-webkit-scrollbar-thumb {
-  background: #c0c4cc;
+.course-tag {
+  color: #606266;
+  background: #f4f4f5;
+  padding: 2px 6px;
   border-radius: 3px;
 }
 
-::-webkit-scrollbar-thumb:hover {
-  background: #909399;
+.item-content {
+  font-size: 14px;
+  color: #606266;
+  line-height: 1.5;
+  /* 限制3行 + 省略 */
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.pagination {
+  margin-top: 20px;
+  justify-content: center;
+}
+
+/* 详情弹窗 */
+.detail-header h3 {
+  margin: 0 0 12px;
+  font-size: 18px;
+}
+
+.detail-meta {
+  font-size: 13px;
+  color: #909399;
+  margin-bottom: 16px;
+  display: flex;
+  gap: 16px;
+  align-items: center;
+}
+
+.detail-body {
+  line-height: 1.8;
+  color: #303133;
+  /* 支持富文本样式 */
+  :deep(p) { margin: 8px 0; }
+  :deep(img) { max-width: 100%; border-radius: 4px; }
 }
 </style>

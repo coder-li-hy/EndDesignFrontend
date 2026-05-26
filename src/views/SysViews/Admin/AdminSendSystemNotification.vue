@@ -249,7 +249,7 @@ export default {
       this.submitting = true
 
       try {
-        const resp = await axios.post('/api/admin/notification/sendSystem', {
+        const resp = await axios.post('/api/notifications', {
           title: this.notifyForm.title.trim(),
           content: this.notifyForm.content.trim()
         })

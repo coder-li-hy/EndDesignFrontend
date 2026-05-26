@@ -688,9 +688,9 @@ export default {
         const userInfo = JSON.parse(sessionStorage.getItem('userInfo') || '{}')
         const teacherId = userInfo.userId
 
-        await axios.post('/api/teacher/notifications/send', {
+        await axios.post('/api/notifications', {
           courseId: this.notifyForm.courseId,
-          teacherId,
+          publisherId:teacherId,
           title: this.notifyForm.title,
           content: this.notifyForm.content
         })

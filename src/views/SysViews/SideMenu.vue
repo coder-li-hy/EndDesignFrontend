@@ -34,23 +34,23 @@ export default {
 
       const menus = {
         'ADMIN': [
-          { path: '/admin/users', title: '用户管理', icon: 'el-icon-user' },
-          { path: '/admin/audit', title: '内容审核', icon: 'el-icon-document' },
-          { path: '/admin/config', title: '系统配置', icon: 'el-icon-setting' },
-          { path: '/admin/sendSys', title: '发送通知', icon: 'el-icon-setting' },
+          { path: '/admin/users', title: '用户管理', icon: 'el-icon-user-solid' },
+          { path: '/admin/audit', title: '内容审核', icon: 'el-icon-s-check' },
+          { path: '/admin/config', title: '系统配置', icon: 'el-icon-s-operation' },
+          { path: '/admin/sendSys', title: '发送通知', icon: 'el-icon-bell' },
         ],
         'TEACHER': [
-          { path: '/teacher/courses', title: '我的课程', icon: 'el-icon-video-camera' },
-          { path: '/teacher/assignments', title: '作业管理', icon: 'el-icon-edit' },
-          { path: '/teacher/resources', title: '课程资源', icon: 'el-icon-edit' },
-          { path: '/teacher/progress', title: '资源管理', icon: 'el-icon-edit' },
-          { path: '/teacher/courseQA', title: '课程问答', icon: 'el-icon-edit' },
+          { path: '/teacher/courses', title: '我的课程', icon: 'el-icon-reading' },
+          // { path: '/teacher/assignments', title: '作业管理', icon: 'el-icon-document-copy' },
+          // { path: '/teacher/resources', title: '课程资源', icon: 'el-icon-folder-opened' },
+          // { path: '/teacher/progress', title: '资源管理', icon: 'el-icon-data-analysis' },
+          // { path: '/teacher/courseQA', title: '课程问答', icon: 'el-icon-chat-dot-round' },
         ],
         'STUDENT': [
-          { path: '/student/courses', title: '我的课程', icon: 'el-icon-book' },
-          { path: '/student/market', title: '选课超市', icon: 'el-icon-shopping-cart' },
-          { path: '/student/submit', title: '作业提交', icon: 'el-icon-shopping-cart' },
-          { path: '/student/courseQA', title: '课程问答', icon: 'el-icon-shopping-cart' },
+          { path: '/student/courses', title: '我的课程', icon: 'el-icon-reading' },
+          { path: '/student/market', title: '选课超市', icon: 'el-icon-shop' },
+          // { path: '/student/submit', title: '作业提交', icon: 'el-icon-upload' },
+          // { path: '/student/courseQA', title: '课程问答', icon: 'el-icon-chat-dot-round' },
         ]
       }
 

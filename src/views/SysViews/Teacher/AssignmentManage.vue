@@ -171,6 +171,23 @@
           />
         </el-form-item>
 
+        <!-- ⭐ 新增：截止时间选择器 -->
+        <el-form-item label="截止时间" prop="deadline">
+          <el-date-picker
+              v-model="form.deadline"
+              type="datetime"
+              placeholder="选择作业截止时间"
+              value-format="yyyy-MM-dd HH:mm:ss"
+              style="width: 100%"
+              :disabled-date="disabledDate"
+              :default-time="new Date(2026, 0, 1, 23, 59, 59)"
+          />
+          <div class="form-tip">
+            <i class="el-icon-info"></i>
+            截止时间后学生将无法提交（若未开启"允许迟交"）
+          </div>
+        </el-form-item>
+
         <el-form-item label="允许迟交">
           <el-switch
               v-model="form.allowLate"
@@ -513,7 +530,7 @@ export default {
         assignmentId: null,
         title: '',
         description: '',
-        deadline: '',
+        deadline: '',  // ⭐ 确保此项存在
         allowLate: true
       },
       rules: {
@@ -523,6 +540,10 @@ export default {
         ],
         description: [
           { required: true, message: '请输入作业要求', trigger: 'blur' }
+        ],
+        // ⭐ 新增：截止时间验证规则
+        deadline: [
+          { required: true, message: '请选择作业截止时间', trigger: 'change' }
         ]
       },
 
@@ -548,7 +569,7 @@ export default {
         textContent: '',
         score: null,
         teacherComment: '',
-        gradeTime: null  // 新增：记录原批改时间
+        gradeTime: null
       },
       gradeRules: {
         score: [
@@ -626,6 +647,23 @@ export default {
       }
     },
 
+    // 禁用过去日期
+    disabledDate(date) {
+      return date.getTime() < Date.now() - 86400000
+    },
+
+    // 判断是否已截止
+    isExpired(row) {
+      if (!row?.deadline) return false
+      return new Date(row.deadline) < new Date()
+    },
+
+    // 格式化日期时间
+    formatDateTime(dateTime) {
+      if (!dateTime) return '-'
+      return dateTime
+    },
+
     // ========== 查看代码 ==========
 
     viewCode(row) {
@@ -690,6 +728,9 @@ export default {
     openAddDialog() {
       this.dialogType = 'add'
       this.resetForm()
+      // ⭐ 默认截止时间为当天 23:59:59
+      const now = new Date()
+      this.form.deadline = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')} 23:59:59`
       this.dialogVisible = true
     },
 
@@ -734,7 +775,7 @@ export default {
         assignmentId: null,
         title: '',
         description: '',
-        deadline: '',
+        deadline: '',  // ⭐ 确保初始化
         allowLate: true
       }
       if (this.$refs.formRef) this.$refs.formRef.resetFields()
@@ -752,30 +793,21 @@ export default {
         cancelButtonText: '取消'
       }).then(async () => {
         try {
-          await axios.delete(`/api/teacher/assignments/${row.assignmentId}`)
-          this.$message.success('删除成功')
+          await axios.delete(`/api/teacher/assignments/${row.assignmentId}`).then(resp => {
+            if (resp.data.code === 1) {
+              this.$message.success('删除成功')
+            }
+            else {
+              this.$message.error('删除失败')
+            }
+          })
+
+          // this.$message.success('删除成功')
           this.fetchAssignments()
         } catch (e) {
           this.$message.error(e.response?.data?.msg || '删除失败')
         }
       })
-    },
-
-    // 禁用过去日期
-    disabledDate(date) {
-      return date.getTime() < Date.now() - 86400000
-    },
-
-    // 判断是否已截止
-    isExpired(row) {
-      if (!row?.deadline) return false
-      return new Date(row.deadline) < new Date()
-    },
-
-    // 格式化日期时间
-    formatDateTime(dateTime) {
-      if (!dateTime) return '-'
-      return dateTime
     },
 
     // ========== 提交列表 & 批改 ==========
@@ -814,7 +846,7 @@ export default {
         textContent: submission.textContent,
         score: submission.score,
         teacherComment: submission.teacherComment || '',
-        gradeTime: submission.gradeTime || null  // 保存原批改时间
+        gradeTime: submission.gradeTime || null
       }
       this.gradeDialogVisible = true
     },
