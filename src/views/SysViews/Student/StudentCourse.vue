@@ -135,6 +135,18 @@
                 >
                   <i class="el-icon-edit-outline"></i> 作业
                 </el-button>
+
+                <!-- 🔥 新增：课程资源入口 -->
+                <el-button
+                    size="small"
+                    type="info"
+                    plain
+                    @click="goToResources(course)"
+                    class="action-btn resource"
+                >
+                  <i class="el-icon-folder-opened"></i> 资源
+                </el-button>
+
                 <el-button
                     size="small"
                     type="success"
@@ -508,6 +520,17 @@ export default {
       })
     },
 
+    // 🔥 新增：跳转到课程资源页面
+    goToResources(course) {
+      this.$router.push({
+        path: '/student/courseResource',
+        query: {
+          courseId: course.courseId,
+          courseName: course.courseName
+        }
+      })
+    },
+
     submitAssignment(course) {
       this.$router.push({
         path: '/student/submit',
@@ -809,6 +832,12 @@ export default {
 }
 .action-btn.assignment:hover {
   background: var(--primary); color: white;
+}
+.action-btn.resource {
+  border-color: var(--text-muted); color: var(--text-secondary);
+}
+.action-btn.resource:hover {
+  border-color: var(--primary); color: var(--primary);
 }
 .action-btn.qa {
   border-color: var(--success); color: var(--success);

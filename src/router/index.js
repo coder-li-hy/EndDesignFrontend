@@ -139,8 +139,14 @@ const routes = [
                 path: 'courseQA',
                 name: 'student-courseQA',
                 component: () => import('@/views/SysViews/Student/StudentCourseQa.vue'),
-                meta: { title: '' }
+                meta: { title: '课程问答' }
             },
+            {
+                path:'courseResource',
+                name:'student-courseResource',
+                component: () => import('@/views/SysViews/Student/StudentCourseResource.vue'),
+                meta: { title: '课程资源' }
+            }
         ]
     },
 
