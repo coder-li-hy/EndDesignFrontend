@@ -43,11 +43,11 @@
           <div class="qa-header">
             <div class="qa-user">
               <div class="user-avatar" :class="qa.isAnonymous ? 'anonymous' : 'student'">
-                <i :class="qa.isAnonymous ? 'el-icon-user' : 'el-icon-graduation'"></i>
+                <i :class="'el-icon-user'"></i>
               </div>
               <div class="user-info">
-                <span class="username">{{ qa.isAnonymous ? '匿名用户' : (qa.studentName || '同学') }}</span>
-                <span class="user-role">{{ qa.isAnonymous ? '👤 匿名' : '🎓 学生' }}</span>
+                <span class="username">{{ qa.isAnonymous ? '匿名提问' : ( '提问') }}</span>
+<!--                <span class="user-role">{{ qa.isAnonymous ? '👤 匿名' : '🎓 学生' }}</span>-->
               </div>
             </div>
             <div class="qa-meta">
@@ -358,7 +358,7 @@ export default {
     },
 
     getAuditText(status) {
-      const map = { 'PENDING': '待审核', 'PASS': '已回复', 'REJECT': '已拒绝' }
+      const map = { 'PENDING': '待审核', 'PASS': '审核通过', 'REJECT': '已拒绝' }
       return map[status] || status
     },
 
