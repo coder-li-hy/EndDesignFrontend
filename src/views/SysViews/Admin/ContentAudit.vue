@@ -119,8 +119,8 @@
 
     <!-- 审核列表 -->
     <el-card class="table-card" shadow="never">
-      <!-- 批量操作工具栏 -->
-      <div class="table-toolbar" v-if="auditList.length > 0">
+      <!-- 批量操作工具栏  只有在文件-->
+      <div class="table-toolbar" v-if="auditList.length > 0 && searchForm.status === 'PENDING'">
         <div class="toolbar-left">
           <el-checkbox v-model="selectAll" @change="handleSelectAll" class="select-all">
             <span class="checkbox-label">全选</span>
@@ -342,7 +342,7 @@
                 <el-button
                     size="mini"
                     type="text"
-                    v-if="row.result === 'REJECT'"
+                    v-if="row.result === 'REJECT'|| row.result === 'PASS'"
                     @click="handleReaudit(row)"
                     class="action-btn reaudit"
                 >
