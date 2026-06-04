@@ -411,7 +411,7 @@
       <el-form label-width="90px" class="import-form">
         <el-form-item label="模板下载">
           <el-button type="text" icon="el-icon-download" @click="downloadTemplate" class="btn-template">
-            下载导入模板 (.xlsx)
+           查看导入模板
           </el-button>
         </el-form-item>
         <el-form-item label="选择文件">
@@ -431,7 +431,7 @@
               选择文件
             </el-button>
             <div slot="tip" class="upload-tip">
-              仅支持 CSV/Excel 文件，不超过 5MB
+              仅支持 CSV 文件，不超过 5MB
             </div>
           </el-upload>
           <!-- 已选文件显示 -->
@@ -484,7 +484,6 @@
           <template #default>
             <div class="reset-info">
               <p>• 重置后密码将恢复为默认值：<strong class="default-pwd">123456</strong></p>
-              <p>• 用户下次登录时系统将强制要求修改密码</p>
               <p>• 建议通知用户及时更新密码保障账号安全</p>
             </div>
           </template>
@@ -785,14 +784,15 @@ export default {
     },
     beforeUpload(file) {
       const isCSV = file.type === 'text/csv' || file.name.toLowerCase().endsWith('.csv')
-      const isExcel = file.type === 'application/vnd.ms-excel' ||
-          file.type === 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' ||
-          file.name.toLowerCase().endsWith('.xlsx') ||
-          file.name.toLowerCase().endsWith('.xls')
+      // 暫時無法支持excel文件輸入
+      // const isExcel = file.type === 'application/vnd.ms-excel' ||
+      //     file.type === 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' ||
+      //     file.name.toLowerCase().endsWith('.xlsx') ||
+      //     file.name.toLowerCase().endsWith('.xls')
       const isLt5M = file.size / 1024 / 1024 < 5
 
-      if (!isCSV && !isExcel) {
-        this.$message.error('❌ 只能上传 CSV 或 Excel 文件!')
+      if (!isCSV) {
+        this.$message.error('❌ 只能上传 CSV 文件!')
         return false
       }
       if (!isLt5M) {
@@ -1419,5 +1419,10 @@ export default {
 ::v-deep .el-dialog__headerbtn { top: 18px; right: 20px; }
 ::v-deep .el-dialog__headerbtn .el-dialog__close {
   color: var(--text-muted); font-size: 18px;
+}
+
+/* ========== 隐藏表格表头的全选复选框 ========== */
+.user-table ::v-deep .el-table__header-wrapper .el-table__cell:first-child .el-checkbox {
+  display: none !important;
 }
 </style>
