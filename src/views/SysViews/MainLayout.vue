@@ -20,7 +20,7 @@
         </div>
 
         <div class="header-right">
-          <!-- 🔔 通知图标（独立红点，更醒目） -->
+          <!-- 通知图标（独立红点，更醒目） -->
           <el-badge
               :value="unreadCount"
               :hidden="unreadCount === 0"
@@ -73,7 +73,7 @@ import SideMenu from '@/views/SysViews/SideMenu'
 import AiAssistant from '@/views/SysViews/AiAssistant.vue'
 import Vue from "vue";
 
-// 🔁 事件总线（Vue2 简单方案，也可用 Vuex）
+// 事件总线（Vue2 简单方案，也可用 Vuex）
 const EventBus = new Vue()
 
 export default {
@@ -82,10 +82,10 @@ export default {
   data() {
     return {
       userInfo: JSON.parse(sessionStorage.getItem('userInfo')) || {},
-      unreadCount: 0,          // 🔴 未读通知数
-      hasNewUnread: false,     // ✨ 是否有"新到达"的未读（用于闪烁动画）
-      pollTimer: null,         // ⏱ 轮询定时器
-      lastUnreadCount: 0       // 📊 用于检测变化
+      unreadCount: 0,          // 未读通知数
+      hasNewUnread: false,     // 是否有"新到达"的未读（用于闪烁动画）
+      pollTimer: null,         // 轮询定时器
+      lastUnreadCount: 0       // 用于检测变化
     }
   },
 
@@ -108,27 +108,27 @@ export default {
   },
 
   created() {
-    // 🔄 初始化加载未读数
+    // 初始化加载未读数
     this.fetchUnreadCount()
 
-    // ⏱ 每 60 秒轮询一次未读数（实时性要求不高时）
+    // 每 60 秒轮询一次未读数（实时性要求不高时）
     this.startPolling()
 
-    // 📡 监听子页面发出的"未读数变化"事件（如通知页标记已读后）
+    // 监听子页面发出的"未读数变化"事件（如通知页标记已读后）
     EventBus.$on('unread-count-change', this.handleUnreadUpdate)
 
-    // 📡 监听 WebSocket 推送（如果后端支持）
+    // 监听 WebSocket 推送（如果后端支持）
     // this.initWebSocket()
   },
 
   beforeDestroy() {
-    // 🧹 清理
+    // 清理
     this.stopPolling()
     EventBus.$off('unread-count-change', this.handleUnreadUpdate)
   },
 
   methods: {
-    // 🔔 获取未读数量
+    // 获取未读数量
     async fetchUnreadCount() {
       try {
         const { data } = await this.axios.get('/api/notifications/unread-count')
@@ -141,26 +141,26 @@ export default {
       }
     },
 
-    // 🔄 更新未读数（含新消息检测）
+    // 更新未读数（含新消息检测）
     updateUnreadCount(newCount) {
-      // ✨ 检测是否有"新到达"的未读消息（数量增加）
+      // 检测是否有"新到达"的未读消息（数量增加）
       if (newCount > this.lastUnreadCount && newCount > 0) {
         this.hasNewUnread = true
         // 3 秒后取消闪烁
         setTimeout(() => { this.hasNewUnread = false }, 3000)
-        // 💡 可选：播放提示音 / 浏览器通知
+        // 可选：播放提示音 / 浏览器通知
         // this.playNotifySound()
       }
       this.unreadCount = newCount
       this.lastUnreadCount = newCount
     },
 
-    // 📡 处理子页面事件更新（如通知页标记已读后通知主布局）
+    // 处理子页面事件更新（如通知页标记已读后通知主布局）
     handleUnreadUpdate(newCount) {
       this.updateUnreadCount(newCount)
     },
 
-    // ⏱ 开始轮询
+    // 开始轮询
     startPolling() {
       this.pollTimer = setInterval(() => {
         // 用户活跃时才轮询（避免后台浪费）
@@ -170,7 +170,7 @@ export default {
       }, 60000) // 60 秒
     },
 
-    // ⏹ 停止轮询
+    // 停止轮询
     stopPolling() {
       if (this.pollTimer) {
         clearInterval(this.pollTimer)
@@ -178,7 +178,7 @@ export default {
       }
     },
 
-    // 🔗 跳转到通知页
+    // 跳转到通知页
     goToNotifications() {
       this.$router.push('/notifications')
     },
@@ -198,7 +198,7 @@ export default {
       }
     },
 
-    // 🚪 退出登录
+    // 退出登录
     async handleLogout() {
       this.$confirm('确定要退出登录吗？', '提示', {
         type: 'warning',
@@ -218,24 +218,6 @@ export default {
       })
     },
 
-    // 🔊 播放提示音（可选，需浏览器授权）
-    playNotifySound() {
-      // 简单方案：使用 HTML5 Audio
-      const audio = new Audio('/sounds/notify.mp3') // 需准备音频文件
-      audio.play().catch(e => console.log('音频播放受限:', e))
-    },
-
-    // 🌐 初始化 WebSocket（可选，实时推送方案）
-    // initWebSocket() {
-    //   const ws = new WebSocket(`ws://${process.env.VUE_APP_WS_HOST}/ws/notifications`)
-    //   ws.onmessage = (event) => {
-    //     const data = JSON.parse(event.data)
-    //     if (data.type === 'NEW_NOTIFICATION') {
-    //       this.updateUnreadCount(this.unreadCount + 1)
-    //       this.$notify.info({ title: '新通知', message: data.title, duration: 4000 })
-    //     }
-    //   }
-    // }
   }
 }
 </script>
@@ -270,10 +252,10 @@ export default {
 .header-right {
   display: flex;
   align-items: center;
-  gap: 16px; /* 🔔 通知图标与用户下拉的间距 */
+  gap: 16px; /* 通知图标与用户下拉的间距 */
 }
 
-/* 🔔 通知图标样式 */
+/* 通知图标样式 */
 .notice-icon-wrapper {
   cursor: pointer;
   padding: 8px;
@@ -297,7 +279,7 @@ export default {
   color: #409EFF;
 }
 
-/* ✨ 新消息闪烁动画 */
+/* 新消息闪烁动画 */
 .notice-icon.pulse {
   animation: bell-pulse 1s ease-in-out 3; /* 闪烁 3 次 */
 }
@@ -307,7 +289,7 @@ export default {
   50% { transform: scale(1.2); color: #F56C6C; }
 }
 
-/* 👤 用户区域 */
+/* 用户区域 */
 .user-dropdown {
   margin-left: 8px;
 }
@@ -341,7 +323,7 @@ export default {
   transform: scale(0.9);
 }
 
-/* 📋 下拉菜单内红点 */
+/* 下拉菜单内红点 */
 .menu-badge {
   margin-left: 8px;
 }

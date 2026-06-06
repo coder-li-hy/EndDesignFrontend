@@ -235,7 +235,7 @@ export default {
   methods: {
     // 获取用户信息
     fetchUserInfo() {
-      // ⚠️ 使用 Session，不需要手动加 Token，浏览器自动携带 Cookie
+      // 使用 Session，不需要手动加 Token，浏览器自动携带 Cookie
       axios.get('/api/auth/info')
           .then(resp => {
             // 适配你的 R<T> 返回格式
@@ -304,7 +304,7 @@ export default {
 
         this.pwdLoading = true;
 
-        // ⚠️ 字段名必须与后端 SysUserDto 完全一致（小驼峰）
+        // 字段名必须与后端 SysUserDto 完全一致（小驼峰）
         const params = {
           oldpassword: this.pwdForm.oldpassword,
           newpassword: this.pwdForm.newpassword

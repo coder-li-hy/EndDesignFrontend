@@ -444,7 +444,6 @@ export default {
   },
 
   methods: {
-    // ========== 工具方法 ==========
 
     // 学分标签类型
     getCreditTagType(credits) {

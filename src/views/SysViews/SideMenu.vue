@@ -27,7 +27,7 @@ export default {
       return this.$route.path
     },
 
-    // ⭐ 根据角色返回不同的菜单列表
+    // 根据角色返回不同的菜单列表
     menuList() {
       const userInfo = JSON.parse(sessionStorage.getItem('userInfo') || '{}')
       const role = userInfo.role

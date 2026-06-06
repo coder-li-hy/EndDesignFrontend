@@ -109,7 +109,7 @@ export default {
           // 设置登录状态
           sessionStorage.setItem('isLogin', 'true')
 
-          // ✅ 关键：存储完整的用户信息（包含 role 字段）
+          // 关键：存储完整的用户信息（包含 role 字段）
           sessionStorage.setItem('userInfo', JSON.stringify(resp.data.data))
 
           // 记住我功能
@@ -119,7 +119,7 @@ export default {
 
           this.$message.success("登录成功");
 
-          // ✅ 核心修改：根据角色跳转到不同界面
+          // 核心修改：根据角色跳转到不同界面
           const role = resp.data.data.role;  // 从后端返回的用户信息中获取角色
           const roleRoutes = {
             'ADMIN': 'admin',           // 管理员 → /admin（默认跳到 /admin/users）
@@ -492,7 +492,6 @@ export default {
   }
 }
 
-/* Element UI 组件深度定制 */
 .el-form-item__label {
   color: #555;
   font-weight: 500;

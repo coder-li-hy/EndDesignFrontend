@@ -138,7 +138,7 @@ export default {
   },
 
   methods: {
-    // 🔄 获取通知列表
+    // 获取通知列表
     async fetchNotifications() {
       this.loading = true
       try {
@@ -163,17 +163,17 @@ export default {
       }
     },
 
-    // 🔔 获取未读数量（更新红点）
+    // 获取未读数量（更新红点）
     async fetchUnreadCount() {
       try {
         const { data } = await axios.get('/api/notifications/unread-count')
         this.hasUnread = data.code === 1 && data.data > 0
-        // 🔄 通知主布局更新红点（事件总线或 Vuex）
+        // 通知主布局更新红点（事件总线或 Vuex）
         this.$emit('unread-count-change', data.data || 0)
       } catch (e) { console.error(e) }
     },
 
-    // 📚 获取我的课程（用于筛选）
+    // 获取我的课程（用于筛选）
     async fetchMyCourses() {
       try {
         const { data } = await axios.get('/api/courses/my') // 需你实现该接口
@@ -183,13 +183,13 @@ export default {
       } catch (e) { console.error(e) }
     },
 
-    // 🔍 筛选条件变化时重置页码并刷新
+    // 筛选条件变化时重置页码并刷新
     handleFilter() {
       this.pagination.page = 1
       this.fetchNotifications()
     },
 
-    // 📄 分页处理
+    // 分页处理
     handlePageChange(page) {
       this.pagination.page = page
       this.fetchNotifications()
@@ -240,7 +240,7 @@ export default {
           })
     },
 
-    // 👆 点击通知项：打开详情 + 自动标记已读
+    // 点击通知项：打开详情 + 自动标记已读
     handleClick(item) {
       this.currentDetail = { ...item }
       this.detailVisible = true

@@ -1421,7 +1421,6 @@ export default {
   color: var(--text-muted); font-size: 18px;
 }
 
-/* ========== 隐藏表格表头的全选复选框 ========== */
 .user-table ::v-deep .el-table__header-wrapper .el-table__cell:first-child .el-checkbox {
   display: none !important;
 }

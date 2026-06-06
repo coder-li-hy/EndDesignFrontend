@@ -78,9 +78,9 @@
               @change="handleSearch"
               class="filter-select"
           >
-            <el-option label="📚 课程资源" value="RESOURCE" />
-            <el-option label="💬 问答互动" value="QA" />
-            <el-option label="📝 作业提交" value="SUBMISSION" />
+            <el-option label="📚 课程资源" value="RESOURCE"/>
+            <el-option label="💬 问答互动" value="QA"/>
+            <el-option label="📝 作业提交" value="SUBMISSION"/>
           </el-select>
         </el-form-item>
         <el-form-item label="审核状态">
@@ -91,9 +91,9 @@
               @change="handleSearch"
               class="filter-select"
           >
-            <el-option label="⏳ 待审核" value="PENDING" />
-            <el-option label="✅ 已通过" value="PASS" />
-            <el-option label="❌ 已拒绝" value="REJECT" />
+            <el-option label="⏳ 待审核" value="PENDING"/>
+            <el-option label="✅ 已通过" value="PASS"/>
+            <el-option label="❌ 已拒绝" value="REJECT"/>
           </el-select>
         </el-form-item>
         <el-form-item label="关键词">
@@ -167,7 +167,7 @@
           @row-mouse-leave="handleRowLeave"
           class="audit-table"
       >
-        <el-table-column type="selection" width="48" align="center" />
+        <el-table-column type="selection" width="48" align="center"/>
 
         <!-- 内容类型 -->
         <el-table-column label="类型" width="110" align="center">
@@ -552,7 +552,10 @@
 
         <!-- 作业详情 -->
         <template v-else-if="detailData.targetType === 'SUBMISSION'">
-          <el-descriptions-item label="作业标题">{{ detailData.submission?.assignmentTitle || '-' }}</el-descriptions-item>
+          <el-descriptions-item label="作业标题">{{
+              detailData.submission?.assignmentTitle || '-'
+            }}
+          </el-descriptions-item>
           <el-descriptions-item label="提交类型">
             <el-tag size="mini" effect="plain">{{ detailData.submission?.contentType || '-' }}</el-tag>
           </el-descriptions-item>
@@ -638,10 +641,10 @@ export default {
   data() {
     return {
       // 统计卡片
-      stats: { pending: 0, passed: 0, rejected: 0 },
+      stats: {pending: 0, passed: 0, rejected: 0},
 
       // 搜索条件
-      searchForm: { targetType: '', status: 'PENDING', keyword: '' },
+      searchForm: {targetType: '', status: 'PENDING', keyword: ''},
 
       // 表格数据
       loading: false,
@@ -658,7 +661,7 @@ export default {
       rejectDialogVisible: false,
       rejecting: false,
       selectedTarget: null,
-      rejectForm: { reason: '' },
+      rejectForm: {reason: ''},
       quickRejectReasons: [
         '内容不符合规范',
         '包含敏感信息',
@@ -670,7 +673,7 @@ export default {
       // 批量拒绝弹窗
       batchRejectDialogVisible: false,
       batchRejecting: false,
-      batchRejectForm: { reason: '' },
+      batchRejectForm: {reason: ''},
 
       // 详情弹窗
       detailDialogVisible: false,
@@ -693,7 +696,7 @@ export default {
 
     // 打开详情（统一入口）
     openDetailDialog(row, isPreview = false) {
-      this.detailData = { ...row }
+      this.detailData = {...row}
       this.detailDialogVisible = true
       this.previewDetailDialogVisible = isPreview
     },
@@ -717,7 +720,9 @@ export default {
       try {
         const resp = await axios.get('/api/audit/stats')
         if (resp.data.code === 1) this.stats = resp.data.data
-      } catch (e) { console.error('Fetch stats error:', e) }
+      } catch (e) {
+        console.error('Fetch stats error:', e)
+      }
     },
 
     async fetchAuditList() {
@@ -744,13 +749,23 @@ export default {
       }
     },
 
-    handleSearch() { this.page = 1; this.fetchAuditList() },
+    handleSearch() {
+      this.page = 1;
+      this.fetchAuditList()
+    },
     handleReset() {
-      this.searchForm = { targetType: '', status: 'PENDING', keyword: '' }
+      this.searchForm = {targetType: '', status: 'PENDING', keyword: ''}
       this.handleSearch()
     },
-    handlePageChange(newPage) { this.page = newPage; this.fetchAuditList() },
-    handleSizeChange(newSize) { this.size = newSize; this.page = 1; this.fetchAuditList() },
+    handlePageChange(newPage) {
+      this.page = newPage;
+      this.fetchAuditList()
+    },
+    handleSizeChange(newSize) {
+      this.size = newSize;
+      this.page = 1;
+      this.fetchAuditList()
+    },
 
     // ========== 表格操作 ==========
     handleSelectionChange(selection) {
@@ -776,8 +791,11 @@ export default {
         try {
           await axios.post(`/api/audit/${row.auditId}/approve`)
           this.$message.success('✅ 审核通过')
-          this.fetchStats(); this.fetchAuditList()
-        } catch (e) { this.$message.error(e.response?.data?.msg || '操作失败') }
+          this.fetchStats();
+          this.fetchAuditList()
+        } catch (e) {
+          this.$message.error(e.response?.data?.msg || '操作失败')
+        }
       })
     },
 
@@ -799,10 +817,13 @@ export default {
         })
         this.$message.success('已拒绝')
         this.rejectDialogVisible = false
-        this.fetchStats(); this.fetchAuditList()
+        this.fetchStats();
+        this.fetchAuditList()
       } catch (e) {
         this.$message.error(e.response?.data?.msg || '操作失败')
-      } finally { this.rejecting = false }
+      } finally {
+        this.rejecting = false
+      }
     },
 
     openBatchRejectDialog() {
@@ -819,13 +840,16 @@ export default {
         this.$message.warning('请先选择要审核的内容')
         return
       }
-      this.$confirm(`确定要通过选中的 ${this.selectedIds.length} 项内容吗？`, '提示', { type: 'success' })
+      this.$confirm(`确定要通过选中的 ${this.selectedIds.length} 项内容吗？`, '提示', {type: 'success'})
           .then(async () => {
             try {
-              await axios.post('/api/audit/batch/approve', { auditIds: this.selectedIds })
+              await axios.post('/api/audit/batch/approve', {auditIds: this.selectedIds})
               this.$message.success('✅ 批量通过成功')
-              this.fetchStats(); this.fetchAuditList()
-            } catch (e) { this.$message.error(e.response?.data?.msg || '操作失败') }
+              this.fetchStats();
+              this.fetchAuditList()
+            } catch (e) {
+              this.$message.error(e.response?.data?.msg || '操作失败')
+            }
           })
     },
 
@@ -842,20 +866,26 @@ export default {
         })
         this.$message.success('✅ 批量拒绝成功')
         this.batchRejectDialogVisible = false
-        await this.fetchStats(); await this.fetchAuditList()
+        await this.fetchStats();
+        await this.fetchAuditList()
       } catch (e) {
         this.$message.error(e.response?.data?.msg || '操作失败')
-      } finally { this.batchRejecting = false }
+      } finally {
+        this.batchRejecting = false
+      }
     },
 
     async handleReaudit(row) {
-      this.$confirm('确定要重新审核此项内容吗？', '提示', { type: 'warning' })
+      this.$confirm('确定要重新审核此项内容吗？', '提示', {type: 'warning'})
           .then(async () => {
             try {
               await axios.post(`/api/audit/${row.auditId}/reaudit`)
               this.$message.success('🔄 已重置为待审核')
-              await this.fetchStats(); await this.fetchAuditList()
-            } catch (e) { this.$message.error(e.response?.data?.msg || '操作失败') }
+              await this.fetchStats();
+              await this.fetchAuditList()
+            } catch (e) {
+              this.$message.error(e.response?.data?.msg || '操作失败')
+            }
           })
     },
 
@@ -878,27 +908,27 @@ export default {
 
     // ========== 工具方法 ==========
     getTypeText(type) {
-      const map = { 'RESOURCE': '课程资源', 'QA': '问答互动', 'SUBMISSION': '作业提交' }
+      const map = {'RESOURCE': '课程资源', 'QA': '问答互动', 'SUBMISSION': '作业提交'}
       return map[type] || type
     },
     getTypeIcon(type) {
-      const map = { 'RESOURCE': 'el-icon-document', 'QA': 'el-icon-chat-dot-square', 'SUBMISSION': 'el-icon-edit' }
+      const map = {'RESOURCE': 'el-icon-document', 'QA': 'el-icon-chat-dot-square', 'SUBMISSION': 'el-icon-edit'}
       return map[type] || 'el-icon-info'
     },
     getTypeTagType(type) {
-      const map = { 'RESOURCE': 'primary', 'QA': 'success', 'SUBMISSION': 'warning' }
+      const map = {'RESOURCE': 'primary', 'QA': 'success', 'SUBMISSION': 'warning'}
       return map[type] || 'info'
     },
     getStatusText(status) {
-      const map = { 'PENDING': '待审核', 'PASS': '已通过', 'REJECT': '已拒绝' }
+      const map = {'PENDING': '待审核', 'PASS': '已通过', 'REJECT': '已拒绝'}
       return map[status] || status
     },
     getStatusTagType(status) {
-      const map = { 'PENDING': 'warning', 'PASS': 'success', 'REJECT': 'danger' }
+      const map = {'PENDING': 'warning', 'PASS': 'success', 'REJECT': 'danger'}
       return map[status] || 'info'
     },
     getRoleText(role) {
-      const map = { 'ADMIN': '管理员', 'TEACHER': '教师', 'STUDENT': '学生' }
+      const map = {'ADMIN': '管理员', 'TEACHER': '教师', 'STUDENT': '学生'}
       return map[role] || role
     },
     getAvatarInitials(username) {
@@ -950,7 +980,9 @@ export default {
 
 .page-bg-decoration {
   position: fixed;
-  top: 0; left: 0; right: 0;
+  top: 0;
+  left: 0;
+  right: 0;
   height: 200px;
   background: radial-gradient(ellipse at top, rgba(79, 70, 229, 0.06) 0%, transparent 70%);
   pointer-events: none;
@@ -971,8 +1003,14 @@ export default {
 }
 
 @keyframes slideDown {
-  from { opacity: 0; transform: translateY(-16px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(-16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .header-left {
@@ -982,40 +1020,53 @@ export default {
 }
 
 .title-icon {
-  width: 48px; height: 48px;
+  width: 48px;
+  height: 48px;
   border-radius: 12px;
   background: linear-gradient(135deg, var(--primary), var(--primary-hover));
-  display: flex; align-items: center; justify-content: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   box-shadow: 0 6px 16px rgba(79, 70, 229, 0.3);
   flex-shrink: 0;
 }
 
 .title-icon i {
-  font-size: 22px; color: white;
+  font-size: 22px;
+  color: white;
 }
 
 .title-content {
-  display: flex; flex-direction: column; gap: 4px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
 }
 
 .page-title {
-  font-size: 22px; font-weight: 700;
-  color: var(--text-primary); margin: 0;
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin: 0;
   letter-spacing: -0.02em;
 }
 
 .page-subtitle {
-  font-size: 13px; color: var(--text-secondary);
-  margin: 0; font-weight: 500;
+  font-size: 13px;
+  color: var(--text-secondary);
+  margin: 0;
+  font-weight: 500;
 }
 
 /* ========== 统计卡片 ========== */
 .stats-cards {
-  display: flex; gap: 12px; flex-wrap: wrap;
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
 }
 
 .stat-card {
-  display: flex; align-items: center;
+  display: flex;
+  align-items: center;
   padding: 14px 18px;
   min-width: 140px;
   border-radius: 14px;
@@ -1032,30 +1083,54 @@ export default {
   border-color: var(--primary);
 }
 
-.stat-card.passed:hover { border-color: var(--success); }
-.stat-card.rejected:hover { border-color: var(--danger); }
+.stat-card.passed:hover {
+  border-color: var(--success);
+}
+
+.stat-card.rejected:hover {
+  border-color: var(--danger);
+}
 
 .stat-icon-wrapper {
   position: relative;
-  width: 42px; height: 42px;
+  width: 42px;
+  height: 42px;
   border-radius: 10px;
-  display: flex; align-items: center; justify-content: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   margin-right: 12px;
   flex-shrink: 0;
 }
 
-.stat-icon-wrapper.pending { background: rgba(245, 158, 11, 0.12); }
-.stat-icon-wrapper.passed { background: rgba(34, 197, 94, 0.12); }
-.stat-icon-wrapper.rejected { background: rgba(239, 68, 68, 0.12); }
+.stat-icon-wrapper.pending {
+  background: rgba(245, 158, 11, 0.12);
+}
+
+.stat-icon-wrapper.passed {
+  background: rgba(34, 197, 94, 0.12);
+}
+
+.stat-icon-wrapper.rejected {
+  background: rgba(239, 68, 68, 0.12);
+}
 
 .stat-icon {
   font-size: 20px;
   z-index: 1;
 }
 
-.stat-icon-wrapper.pending .stat-icon { color: var(--warning); }
-.stat-icon-wrapper.passed .stat-icon { color: var(--success); }
-.stat-icon-wrapper.rejected .stat-icon { color: var(--danger); }
+.stat-icon-wrapper.pending .stat-icon {
+  color: var(--warning);
+}
+
+.stat-icon-wrapper.passed .stat-icon {
+  color: var(--success);
+}
+
+.stat-icon-wrapper.rejected .stat-icon {
+  color: var(--danger);
+}
 
 .stat-glow {
   position: absolute;
@@ -1068,11 +1143,13 @@ export default {
 }
 
 .stat-info {
-  display: flex; flex-direction: column;
+  display: flex;
+  flex-direction: column;
 }
 
 .stat-value {
-  font-size: 22px; font-weight: 700;
+  font-size: 22px;
+  font-weight: 700;
   color: var(--text-primary);
   line-height: 1;
 }
@@ -1082,25 +1159,38 @@ export default {
 }
 
 @keyframes countPop {
-  0% { transform: scale(1); }
-  50% { transform: scale(1.15); }
-  100% { transform: scale(1); }
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.15);
+  }
+  100% {
+    transform: scale(1);
+  }
 }
 
 .stat-label {
-  font-size: 12px; color: var(--text-muted);
-  margin-top: 4px; font-weight: 500;
+  font-size: 12px;
+  color: var(--text-muted);
+  margin-top: 4px;
+  font-weight: 500;
 }
 
 .stat-trend {
   position: absolute;
-  bottom: 8px; right: 12px;
-  font-size: 11px; color: var(--primary);
-  font-weight: 500; opacity: 0;
+  bottom: 8px;
+  right: 12px;
+  font-size: 11px;
+  color: var(--primary);
+  font-weight: 500;
+  opacity: 0;
   transition: opacity 0.2s;
 }
 
-.stat-card:hover .stat-trend { opacity: 1; }
+.stat-card:hover .stat-trend {
+  opacity: 1;
+}
 
 /* ========== 搜索区 ========== */
 .filter-card {
@@ -1111,22 +1201,32 @@ export default {
 }
 
 @keyframes cardEnter {
-  from { opacity: 0; transform: translateY(20px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .filter-header {
-  display: flex; align-items: center; gap: 8px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
   padding: 16px 20px 12px;
   border-bottom: 1px solid var(--border-color);
 }
 
 .filter-icon {
-  font-size: 16px; color: var(--primary);
+  font-size: 16px;
+  color: var(--primary);
 }
 
 .filter-title {
-  font-size: 14px; font-weight: 600;
+  font-size: 14px;
+  font-weight: 600;
   color: var(--text-primary);
 }
 
@@ -1134,8 +1234,13 @@ export default {
   padding: 16px 20px 20px;
 }
 
-.filter-select { width: 140px; }
-.filter-input { width: 220px; }
+.filter-select {
+  width: 140px;
+}
+
+.filter-input {
+  width: 220px;
+}
 
 .filter-select ::v-deep .el-input__inner,
 .filter-input ::v-deep .el-input__inner {
@@ -1152,13 +1257,16 @@ export default {
 
 .filter-actions {
   margin-left: 8px;
-  display: flex; gap: 10px;
+  display: flex;
+  gap: 10px;
 }
 
 .btn-search {
   background: linear-gradient(135deg, var(--primary), var(--primary-hover));
-  border: none; padding: 9px 22px;
-  border-radius: 10px; font-weight: 500;
+  border: none;
+  padding: 9px 22px;
+  border-radius: 10px;
+  font-weight: 500;
   box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3);
 }
 
@@ -1168,7 +1276,8 @@ export default {
 }
 
 .btn-reset {
-  padding: 9px 20px; border-radius: 10px;
+  padding: 9px 20px;
+  border-radius: 10px;
   border: 2px solid var(--border-color);
   font-weight: 500;
 }
@@ -1181,7 +1290,9 @@ export default {
 }
 
 .table-toolbar {
-  display: flex; justify-content: space-between; align-items: center;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
   padding: 14px 20px;
   border-bottom: 1px solid var(--border-color);
   background: var(--bg-hover);
@@ -1189,40 +1300,56 @@ export default {
 }
 
 .toolbar-left, .toolbar-right {
-  display: flex; align-items: center; gap: 12px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
 }
 
 .select-all ::v-deep .el-checkbox__label {
-  font-size: 13px; font-weight: 500; color: var(--text-secondary);
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-secondary);
 }
 
 .selected-count {
-  font-size: 13px; color: var(--text-secondary);
-  display: flex; align-items: center; gap: 5px;
+  font-size: 13px;
+  color: var(--text-secondary);
+  display: flex;
+  align-items: center;
+  gap: 5px;
 }
 
 .selected-count strong {
-  color: var(--primary); font-weight: 600;
+  color: var(--primary);
+  font-weight: 600;
 }
 
 .btn-batch-approve, .btn-batch-reject {
-  border-radius: 8px; font-weight: 500; padding: 7px 16px;
+  border-radius: 8px;
+  font-weight: 500;
+  padding: 7px 16px;
 }
 
 .btn-batch-approve {
   background: rgba(34, 197, 94, 0.1);
-  color: var(--success); border: 1px solid rgba(34, 197, 94, 0.3);
+  color: var(--success);
+  border: 1px solid rgba(34, 197, 94, 0.3);
 }
+
 .btn-batch-approve:hover:not(:disabled) {
-  background: var(--success); color: white;
+  background: var(--success);
+  color: white;
 }
 
 .btn-batch-reject {
   background: rgba(239, 68, 68, 0.1);
-  color: var(--danger); border: 1px solid rgba(239, 68, 68, 0.3);
+  color: var(--danger);
+  border: 1px solid rgba(239, 68, 68, 0.3);
 }
+
 .btn-batch-reject:hover:not(:disabled) {
-  background: var(--danger); color: white;
+  background: var(--danger);
+  color: white;
 }
 
 /* 表格样式 */
@@ -1236,139 +1363,219 @@ export default {
 
 /* 内容预览 */
 .content-preview {
-  display: flex; align-items: center;
+  display: flex;
+  align-items: center;
 }
 
 .preview-item {
-  display: flex; align-items: center; gap: 10px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
 }
 
 .preview-icon {
-  width: 36px; height: 36px;
+  width: 36px;
+  height: 36px;
   border-radius: 8px;
-  display: flex; align-items: center; justify-content: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   flex-shrink: 0;
 }
 
-.preview-item.resource .preview-icon { background: rgba(79, 70, 229, 0.1); color: var(--primary); }
-.preview-item.qa .preview-icon { background: rgba(34, 197, 94, 0.1); color: var(--success); }
-.preview-item.submission .preview-icon { background: rgba(245, 158, 11, 0.1); color: var(--warning); }
+.preview-item.resource .preview-icon {
+  background: rgba(79, 70, 229, 0.1);
+  color: var(--primary);
+}
+
+.preview-item.qa .preview-icon {
+  background: rgba(34, 197, 94, 0.1);
+  color: var(--success);
+}
+
+.preview-item.submission .preview-icon {
+  background: rgba(245, 158, 11, 0.1);
+  color: var(--warning);
+}
 
 .preview-main {
-  display: flex; flex-direction: column; gap: 4px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
   min-width: 0;
 }
 
 .preview-title {
-  font-size: 13px; color: var(--text-primary);
-  font-weight: 500; line-height: 1.4;
-  overflow: hidden; text-overflow: ellipsis;
-  white-space: nowrap; max-width: 180px;
+  font-size: 13px;
+  color: var(--text-primary);
+  font-weight: 500;
+  line-height: 1.4;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 180px;
 }
 
 /* 提交者单元格 */
 .submitter-cell {
-  display: flex; align-items: center; gap: 10px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
 }
 
 .avatar-placeholder {
-  width: 32px; height: 32px;
+  width: 32px;
+  height: 32px;
   border-radius: 50%;
   background: linear-gradient(135deg, var(--primary-light), var(--primary));
   color: white;
-  display: flex; align-items: center; justify-content: center;
-  font-size: 12px; font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: 600;
   flex-shrink: 0;
 }
 
 .submitter-info {
-  display: flex; flex-direction: column; gap: 3px;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
 }
 
 .username {
-  font-size: 13px; color: var(--text-primary);
+  font-size: 13px;
+  color: var(--text-primary);
   font-weight: 500;
 }
 
 .role-tag {
-  font-size: 11px; padding: 0 6px;
+  font-size: 11px;
+  padding: 0 6px;
 }
 
 /* 时间单元格 */
 .time-cell {
-  display: flex; align-items: center; gap: 5px;
-  font-size: 13px; color: var(--text-secondary);
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 13px;
+  color: var(--text-secondary);
 }
 
-.time-icon { color: var(--text-muted); font-size: 12px; }
+.time-icon {
+  color: var(--text-muted);
+  font-size: 12px;
+}
 
 /* 状态标签 */
 .status-tag {
-  font-weight: 500; font-size: 12px;
-  padding: 4px 10px; border-radius: 6px;
+  font-weight: 500;
+  font-size: 12px;
+  padding: 4px 10px;
+  border-radius: 6px;
 }
 
 /* 拒绝原因 */
 .reject-reason {
-  color: var(--danger); font-size: 13px;
-  display: flex; align-items: center; gap: 4px;
+  color: var(--danger);
+  font-size: 13px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
 }
 
-.reject-reason i { font-size: 12px; }
+.reject-reason i {
+  font-size: 12px;
+}
 
-.text-muted { color: var(--text-muted); }
+.text-muted {
+  color: var(--text-muted);
+}
 
 /* 审核人单元格 */
 .auditor-cell {
-  display: flex; flex-direction: column; gap: 3px;
-  font-size: 13px; color: var(--text-primary);
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  font-size: 13px;
+  color: var(--text-primary);
 }
 
 .audit-time {
-  font-size: 11px; color: var(--text-muted);
+  font-size: 11px;
+  color: var(--text-muted);
 }
 
 /* 操作按钮 */
 .action-buttons {
-  display: flex; justify-content: center; gap: 4px;
+  display: flex;
+  justify-content: center;
+  gap: 4px;
 }
 
 .action-btn {
-  font-size: 12px; padding: 4px 8px;
-  border-radius: 6px; transition: all 0.15s;
+  font-size: 12px;
+  padding: 4px 8px;
+  border-radius: 6px;
+  transition: all 0.15s;
 }
 
-.action-btn.approve { color: var(--success); }
-.action-btn.approve:hover { background: rgba(34, 197, 94, 0.1); }
+.action-btn.approve {
+  color: var(--success);
+}
 
-.action-btn.reject { color: var(--danger); }
-.action-btn.reject:hover { background: rgba(239, 68, 68, 0.1); }
+.action-btn.approve:hover {
+  background: rgba(34, 197, 94, 0.1);
+}
 
-.action-btn.detail { color: var(--primary); }
-.action-btn.detail:hover { background: var(--primary-light); }
+.action-btn.reject {
+  color: var(--danger);
+}
 
-.action-btn.reaudit { color: var(--warning); }
-.action-btn.reaudit:hover { background: rgba(245, 158, 11, 0.1); }
+.action-btn.reject:hover {
+  background: rgba(239, 68, 68, 0.1);
+}
+
+.action-btn.detail {
+  color: var(--primary);
+}
+
+.action-btn.detail:hover {
+  background: var(--primary-light);
+}
+
+.action-btn.reaudit {
+  color: var(--warning);
+}
+
+.action-btn.reaudit:hover {
+  background: rgba(245, 158, 11, 0.1);
+}
 
 /* 空状态 */
 .empty-state {
-  text-align: center; padding: 48px 20px;
+  text-align: center;
+  padding: 48px 20px;
   color: var(--text-secondary);
 }
 
 .empty-icon {
-  font-size: 48px; color: var(--text-muted);
+  font-size: 48px;
+  color: var(--text-muted);
   margin-bottom: 12px;
 }
 
 .empty-text {
-  font-size: 14px; margin-bottom: 16px;
+  font-size: 14px;
+  margin-bottom: 16px;
 }
 
 /* 分页 */
 .pagination-wrapper {
   padding: 16px 20px 20px;
-  display: flex; justify-content: flex-end;
+  display: flex;
+  justify-content: flex-end;
 }
 
 .audit-pagination ::v-deep .el-pagination {
@@ -1388,7 +1595,8 @@ export default {
 }
 
 .modal-custom ::v-deep .el-dialog__title {
-  font-size: 16px; font-weight: 600;
+  font-size: 16px;
+  font-weight: 600;
   color: var(--text-primary);
 }
 
@@ -1402,7 +1610,8 @@ export default {
 }
 
 .reject-tip, .batch-tip {
-  border-radius: 10px; margin-bottom: 16px;
+  border-radius: 10px;
+  margin-bottom: 16px;
 }
 
 .reject-tip ::v-deep .el-alert__content,
@@ -1411,14 +1620,18 @@ export default {
 }
 
 .reject-tip p, .batch-tip p {
-  margin: 4px 0 0; font-size: 13px;
+  margin: 4px 0 0;
+  font-size: 13px;
   color: var(--text-secondary);
 }
 
-.modal-form { margin-top: 8px; }
+.modal-form {
+  margin-top: 8px;
+}
 
 .reason-input ::v-deep .el-textarea__inner {
-  border-radius: 10px; border: 2px solid var(--border-color);
+  border-radius: 10px;
+  border: 2px solid var(--border-color);
   transition: border-color 0.2s;
 }
 
@@ -1429,84 +1642,109 @@ export default {
 
 /* 常用原因标签 */
 .quick-reasons {
-  display: flex; align-items: center; gap: 8px;
-  margin-top: 8px; flex-wrap: wrap;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 8px;
+  flex-wrap: wrap;
 }
 
 .quick-label {
-  font-size: 12px; color: var(--text-muted);
+  font-size: 12px;
+  color: var(--text-muted);
   font-weight: 500;
 }
 
 .quick-reason-tag {
-  cursor: pointer; font-size: 11px;
+  cursor: pointer;
+  font-size: 11px;
   transition: all 0.15s;
 }
 
 .quick-reason-tag:hover {
-  border-color: var(--primary); color: var(--primary);
+  border-color: var(--primary);
+  color: var(--primary);
   background: var(--primary-light);
 }
 
 .dialog-footer {
-  display: flex; justify-content: flex-end; gap: 12px;
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
 }
 
 .btn-confirm-reject, .btn-approve, .btn-reject {
-  padding: 9px 24px; border-radius: 10px;
+  padding: 9px 24px;
+  border-radius: 10px;
   font-weight: 500;
 }
 
 .btn-confirm-reject {
-  background: var(--danger); border: none;
+  background: var(--danger);
+  border: none;
 }
 
 .btn-approve {
-  background: var(--success); border: none;
-  display: flex; align-items: center; gap: 5px;
+  background: var(--success);
+  border: none;
+  display: flex;
+  align-items: center;
+  gap: 5px;
 }
 
 .btn-reject {
-  background: var(--danger); border: none;
-  display: flex; align-items: center; gap: 5px;
+  background: var(--danger);
+  border: none;
+  display: flex;
+  align-items: center;
+  gap: 5px;
 }
 
 /* 详情弹窗 */
 .detail-descriptions ::v-deep .el-descriptions__label {
-  font-weight: 500; color: var(--text-secondary);
+  font-weight: 500;
+  color: var(--text-secondary);
   width: 100px;
 }
 
 .detail-descriptions ::v-deep .el-descriptions__content {
-  color: var(--text-primary); font-size: 14px;
+  color: var(--text-primary);
+  font-size: 14px;
 }
 
 .detail-link {
-  display: inline-flex; align-items: center; gap: 4px;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
   font-weight: 500;
 }
 
 .qa-content {
-  line-height: 1.6; color: var(--text-primary);
+  line-height: 1.6;
+  color: var(--text-primary);
   white-space: pre-wrap;
 }
 
 .submission-text {
-  font-size: 13px; color: var(--text-secondary);
+  font-size: 13px;
+  color: var(--text-secondary);
   line-height: 1.5;
 }
 
 .reject-reason-detail {
-  color: var(--danger); font-size: 13px;
+  color: var(--danger);
+  font-size: 13px;
   line-height: 1.5;
 }
 
 .submitter-name {
-  font-weight: 500; margin-right: 8px;
+  font-weight: 500;
+  margin-right: 8px;
 }
 
 .audit-time-detail {
-  color: var(--text-muted); font-size: 12px;
+  color: var(--text-muted);
+  font-size: 12px;
 }
 
 /* ========== 暗黑模式 ========== */
@@ -1524,10 +1762,13 @@ export default {
   .filter-select ::v-deep .el-input__inner,
   .filter-input ::v-deep .el-input__inner,
   .reason-input ::v-deep .el-textarea__inner {
-    background: #334155; color: var(--text-primary);
+    background: #334155;
+    color: var(--text-primary);
   }
 
-  .stat-card { background: var(--bg-card); }
+  .stat-card {
+    background: var(--bg-card);
+  }
 
   .audit-table ::v-deep .el-table {
     background: var(--bg-card);
@@ -1541,34 +1782,58 @@ export default {
 
 /* ========== 响应式 ========== */
 @media (max-width: 1024px) {
-  .page-header { flex-direction: column; align-items: flex-start; }
-  .stats-cards { width: 100%; justify-content: space-between; }
-  .stat-card { flex: 1; min-width: 100px; justify-content: center; }
+  .page-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .stats-cards {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .stat-card {
+    flex: 1;
+    min-width: 100px;
+    justify-content: center;
+  }
 }
 
 @media (max-width: 768px) {
-  .content-audit { padding: 16px; }
+  .content-audit {
+    padding: 16px;
+  }
 
   .filter-form {
-    display: flex; flex-direction: column; align-items: stretch;
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
   }
 
   .filter-form ::v-deep .el-form-item {
-    width: 100%; margin-right: 0 !important; margin-bottom: 12px;
+    width: 100%;
+    margin-right: 0 !important;
+    margin-bottom: 12px;
   }
 
-  .filter-select, .filter-input { width: 100%; }
+  .filter-select, .filter-input {
+    width: 100%;
+  }
 
   .filter-actions {
-    width: 100%; justify-content: flex-end;
+    width: 100%;
+    justify-content: flex-end;
   }
 
   .table-toolbar {
-    flex-direction: column; align-items: flex-start; gap: 12px;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
   }
 
   .toolbar-left, .toolbar-right {
-    width: 100%; justify-content: space-between;
+    width: 100%;
+    justify-content: space-between;
   }
 
   .audit-table ::v-deep .el-table__row > td {
@@ -1576,7 +1841,8 @@ export default {
   }
 
   .action-buttons {
-    flex-direction: column; gap: 2px;
+    flex-direction: column;
+    gap: 2px;
   }
 
   .modal-custom ::v-deep .el-dialog {
@@ -1587,7 +1853,8 @@ export default {
 
 /* Element UI 微调 */
 ::v-deep .el-tag--mini {
-  padding: 2px 8px; border-radius: 5px;
+  padding: 2px 8px;
+  border-radius: 5px;
 }
 
 ::v-deep .el-table th.el-table__cell {
@@ -1595,14 +1862,21 @@ export default {
 }
 
 ::v-deep .el-checkbox__inner {
-  border-radius: 4px; border-width: 2px;
+  border-radius: 4px;
+  border-width: 2px;
 }
 
 ::v-deep .el-dialog__headerbtn {
-  top: 18px; right: 20px;
+  top: 18px;
+  right: 20px;
 }
 
 ::v-deep .el-dialog__headerbtn .el-dialog__close {
-  color: var(--text-muted); font-size: 18px;
+  color: var(--text-muted);
+  font-size: 18px;
+}
+
+.audit-table ::v-deep .el-table__header-wrapper .el-table__cell:first-child .el-checkbox {
+  display: none !important;
 }
 </style>

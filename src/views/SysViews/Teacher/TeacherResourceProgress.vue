@@ -348,7 +348,6 @@ export default {
 
   data() {
     return {
-      // ⭐ 迟交分析相关状态（新增）
       analyzingLate: false,
       lateAnalysisError: null,
 
@@ -635,7 +634,7 @@ export default {
       return unique.map(d => `${d.getMonth() + 1}-${d.getDate()}`)
     },
 
-    // 🎯 柱状图：分数分布
+    // 柱状图：分数分布
     updateScoreChart() {
       if (!this.scoreChart) return
       const ranges = [
@@ -678,7 +677,7 @@ export default {
       this.scoreChart.setOption(option)
     },
 
-    // ⚠️ 环形图：迟交原因分析（⭐ 对接后端 AI 接口 - 核心代码）
+    // 饼图：迟交原因分析
     async updateLateChart() {
       if (!this.lateChart) return
       this.analyzingLate = true
@@ -708,7 +707,7 @@ export default {
         // 3. 处理响应
         if (resp.data.code === 1 && resp.data.data?.categories?.length > 0) {
           const result = resp.data.data
-          console.log('✅ AI 分析结果:', result)  // ⭐ 添加这行调试
+          console.log('AI 分析结果:', result)  // 调试部分
           // 确保 categories 是数组且每项都有 name
           const validCategories = (result.categories || []).filter(c => c?.name?.trim())
 
@@ -749,14 +748,13 @@ export default {
       }
     },
 
-    // 🎨 渲染正常分析结果的图表（修复版）
+    // 渲染分析结果的图表
     renderLateChart(categories, summary) {
       if (!this.lateChart) return
 
-      // ⭐ 关键修复 1: 创建映射表，避免每次查找
       const categoryMap = {}
       categories.forEach(c => {
-        // 使用 trim() 去除可能的空格，确保匹配可靠
+        // 使用trim()去除可能的空格，确保匹配可靠
         const key = c.name?.trim()
         if (key) categoryMap[key] = c
       })
@@ -764,14 +762,12 @@ export default {
       const option = {
         tooltip: {
           trigger: 'item',
-          // ⭐ 关键修复 2: 更健壮的 formatter
           formatter: (params) => {
             // 优先用映射表查找，其次用模糊匹配
             const itemName = params.name?.trim()
             const item = categoryMap[itemName] ||
                 categories.find(c => c.name?.trim() === itemName)
 
-            // ⭐ 关键修复 3: 安全处理 examples
             let examples = '无'
             if (item?.examples && Array.isArray(item.examples) && item.examples.length > 0) {
               examples = item.examples.slice(0, 2).join('；')
@@ -811,7 +807,6 @@ export default {
               show: true,
               fontSize: 14,
               fontWeight: 'bold',
-              // ⭐ 关键修复 4: 悬停标签也使用安全查找
               formatter: (params) => {
                 const itemName = params.name?.trim()
                 const item = categoryMap[itemName]
@@ -819,7 +814,6 @@ export default {
               }
             }
           },
-          // ⭐ 关键修复 5: 确保 data 格式正确
           data: categories.map(r => {
             // 确保每个数据项都有必需的字段
             return {
@@ -833,14 +827,12 @@ export default {
         }]
       }
 
-      // ⭐ 关键修复 6: notMerge=true 确保完全覆盖旧配置
       this.lateChart.setOption(option, true)
 
       // 更新底部注释
       this.updateLateChartNote(summary)
     },
 
-    // 🎨 渲染空状态/错误状态的图表
     renderEmptyLateChart(message) {
       if (!this.lateChart) return
       const option = {
@@ -857,7 +849,6 @@ export default {
       this.updateLateChartNote(null)
     },
 
-    // 📝 更新图表底部的分析摘要
     updateLateChartNote(summary) {
       const noteEl = this.$el.querySelector('.chart-note')
       if (!noteEl) return

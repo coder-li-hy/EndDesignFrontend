@@ -211,7 +211,7 @@
           effect="light"
       >
         <template #default>
-          <p>您正在迟交作业，请务必填写迟交理由，老师将据此评分</p>
+          <p>您的作业已迟交，请务必填写迟交理由，老师将据此评分</p>
         </template>
       </el-alert>
 
@@ -238,6 +238,7 @@
               v-model="submitForm.contentType"
               @change="handleContentTypeChange"
               class="content-type-radio"
+              size="medium"
           >
             <el-radio label="TEXT" border class="radio-option text">
               <i class="el-icon-edit"></i> 文本
@@ -589,7 +590,6 @@ export default {
       uploadUrl: '/api/common/upload',
       uploadHeaders: {},
 
-      // 🎯 查看提交详情（新增）
       viewDialogVisible: false,
       viewSubmission: {},
       codeWrap: false,
@@ -912,6 +912,26 @@ export default {
 </script>
 
 <style scoped>
+
+.content-type-radio ::v-deep .el-radio__label {
+  display: inline-flex !important;       /* 使用 flex 布局让图标和文字垂直居中 */
+  align-items: center !important;        /* 垂直居中对齐 */
+  white-space: nowrap !important;        /* 【核心】强制不换行，防止文字被挤到下一行 */
+}
+
+/* 给图标和文字之间增加一点间距，看起来更美观 */
+.content-type-radio ::v-deep .el-radio__label i {
+  margin-right: 4px;
+  font-size: 14px; /* 可根据需要微调图标大小 */
+}
+
+/* 确保 radio 按钮本身有足够的内部空间 */
+.content-type-radio .radio-option {
+  padding: 0 15px; /* 左右增加一点内边距 */
+  height: 36px;    /* 确保高度足够容纳内容 (medium 默认通常是 36px) */
+  line-height: 34px; /* 行高与高度匹配，保证整体垂直居中 */
+}
+
 /* ========== CSS 变量 ========== */
 .assignment-submit {
   --primary: #4f46e5;

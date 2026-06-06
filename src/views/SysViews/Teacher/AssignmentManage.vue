@@ -802,7 +802,7 @@ export default {
             }
           })
 
-          // this.$message.success('删除成功')
+          this.$message.success('删除成功')
           this.fetchAssignments()
         } catch (e) {
           this.$message.error(e.response?.data?.msg || '删除失败')
