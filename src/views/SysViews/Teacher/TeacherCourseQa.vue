@@ -824,7 +824,6 @@ export default {
   }
 }
 
-/* ========== Element UI 深度定制 ========== */
 .el-form-item__label {
   color: #555;
   font-weight: 500;

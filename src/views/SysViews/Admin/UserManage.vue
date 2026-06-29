@@ -402,12 +402,11 @@
             </div>
             <div class="tip-item">
               <i class="el-icon-files"></i>
-              <span>支持 .xlsx / .xls / .csv 格式，单次最多 100 条</span>
+              <span>支持 .csv 格式，单次最多 100 条</span>
             </div>
           </div>
         </template>
       </el-alert>
-
       <el-form label-width="90px" class="import-form">
         <el-form-item label="模板下载">
           <el-button type="text" icon="el-icon-download" @click="downloadTemplate" class="btn-template">

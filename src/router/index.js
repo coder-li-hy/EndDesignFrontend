@@ -158,11 +158,11 @@ const routes = [
 ]
 
 const router = new VueRouter({
-    mode: 'history',  // 去掉 URL 中的 # 号（可选）
+    mode: 'history',
     routes
 })
 
-// ========== 最简单的路由守卫（只处理登录状态） ==========
+// ========== 路由守卫 ==========
 router.beforeEach((to, from, next) => {
     // 1. 如果是公开页面（如登录页），直接放行
     if (to.meta['public']) {
@@ -172,12 +172,12 @@ router.beforeEach((to, from, next) => {
 
     // 2. 如果需要登录，检查是否已登录（通过 sessionStorage 判断）
     if (to.meta['requireLogin']) {
-        // 判断登录状态：你的后端用 Session，前端可以存一个标记
+        // 判断登录状态：后端用 Session，前端可以存一个标记
         const isLogin = sessionStorage.getItem('isLogin') === 'true'
 
         if (!isLogin) {
             // 未登录：提示 + 跳转登录页，并记录原路径
-            alert('请先登录')  // 或用 Vue.prototype.$message.warning()
+            alert('请先登录')
             next({
                 path: '/login',
                 query: { redirect: to.fullPath }  // 登录成功后跳回原页面
@@ -187,7 +187,7 @@ router.beforeEach((to, from, next) => {
     }
 
     // 3. 其他情况直接放行
-    // ⚠️ 角色权限校验交给后端接口，前端不做拦截
+    // 角色权限校验交给后端接口，前端不做拦截
     next()
 })
 

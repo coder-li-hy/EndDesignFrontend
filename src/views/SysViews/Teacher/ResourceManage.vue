@@ -135,10 +135,9 @@
                 <el-button
                     size="mini"
                     type="text"
-                    :href="row.fileUrl"
                     target="_blank"
                     class="action-link"
-                    @click.stop
+                    @click="openLink(row)"
                 >
                   🔗 访问
                 </el-button>
@@ -149,11 +148,9 @@
                 <el-button
                     size="mini"
                     type="text"
-                    :href="getFileDownloadUrl(row)"
                     target="_blank"
-                    :download="getDownloadFileName(row)"
+                    @click="downloadResource(row)"
                     class="action-download"
-                    @click.stop
                 >
                   ⬇️ 下载
                 </el-button>
@@ -358,6 +355,30 @@
           {{ submitting ? '提交中...' : '确 定' }}
         </el-button>
       </template>
+    </el-dialog><!-- 链接确认弹窗 -->
+    <el-dialog
+        title="🔗 访问外部链接"
+        :visible.sync="linkDialogVisible"
+        width="400px"
+        :close-on-click-modal="false"
+        class="dialog-custom"
+    >
+      <el-alert
+          title="⚠️ 您即将访问外部网站"
+          type="warning"
+          :closable="false"
+          show-icon
+          class="mb-3"
+      />
+      <p class="link-url" :title="currentResource?.fileUrl">
+        {{ currentResource?.fileUrl }}
+      </p>
+      <template #footer>
+        <el-button @click="linkDialogVisible = false">取 消</el-button>
+        <el-button type="primary" @click="confirmOpenLink">
+          确认访问
+        </el-button>
+      </template>
     </el-dialog>
 
   </div>
@@ -371,6 +392,7 @@ export default {
 
   data() {
     return {
+      linkDialogVisible: false,
       // 课程信息
       courseId: null,
       courseName: '',
@@ -467,6 +489,13 @@ export default {
   },
 
   methods: {
+    // 确认打开链接
+    confirmOpenLink() {
+      if (this.currentResource?.fileUrl) {
+        window.open(this.currentResource.fileUrl, '_blank')
+      }
+      this.linkDialogVisible = false
+    },
     // ========== 工具方法 ==========
 
     // 获取类型标签效果
@@ -693,9 +722,35 @@ export default {
 
     // ========== 工具方法 ==========
 
+    downloadResource(resource) {
+      if (!resource.fileUrl) {
+        this.$message.warning('资源链接为空')
+        return
+      }
+      // 创建临时 a 标签触发下载
+      const a = document.createElement('a')
+      a.href = resource.fileUrl
+      a.download = resource.oriName || 'download'
+      a.target = '_blank'
+      document.body.appendChild(a)
+      a.click()
+      document.body.removeChild(a)
+
+      this.$message.success('📥 下载已开始')
+    },
+
+    openLink(resource) {
+      if (!resource.fileUrl) {
+        this.$message.warning('链接地址为空')
+        return
+      }
+      this.currentResource = resource
+      this.linkDialogVisible = true
+    },
+
     getFileDownloadUrl(row) {
       return process.env.NODE_ENV === 'development'
-          ? `http://localhost:8080${row.fileUrl}`
+          ? `http://localhost:${row.fileUrl}`
           : row.fileUrl
     },
 
